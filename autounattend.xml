@@ -1347,12 +1347,9 @@ $qa = (New-Object -Com Shell.Application).Namespace($quickAccessPath);
 foreach ($item in $qa.Items()) { # Enumerate and unpin items
     if ($item.Name -ne "Desktop" -and $item.Name -ne "Downloads") { $item.InvokeVerb("unpinfromhome"); }}
 
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0 -Force | Out-Null
 # $null = Invoke-Expression "net user Administrator Admin132 /active:yes"          # Was just for testing purpose, not needed
 # Write-Host "`nAttempted to enable the built-in Administrator account" -ForegroundColor Green  # Not really needed
-
-New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0 -Force | Out-Null
-Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Runonce" -Name "currentuser" -Force -ErrorAction SilentlyContinue #Delete it if it hasnt already for some reason
-Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "PostInstall" -Force -ErrorAction SilentlyContinue #Current script is mainly done executing so safe to remove hkcu startup regkey
 
 Write-Host "`nFinished making changes to the system!"
 
@@ -1383,6 +1380,8 @@ if ($usernameResponse -eq "Y" -or $usernameResponse -eq "YES") {
   } catch { Write-Host "Failed to rename user account..." }
 }
 
+Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Runonce" -Name "currentuser" -Force -ErrorAction SilentlyContinue #Delete it if it hasnt already for some reason
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "PostInstall" -Force -ErrorAction SilentlyContinue #Current script is mainly done executing so safe to remove hkcu startup regkey
 $null = reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "AppsInstall" /t REG_SZ /d "powershell.exe -File C:\Windows\Setup\Scripts\AppsInstall.ps1" /f
 $null = Clear-RecycleBin -Force
 
