@@ -1605,8 +1605,9 @@ if (Test-InternetConnection) { # Check for an internet connection
       Start-Sleep -Seconds 15
     }
     
-    if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green }
-    else {  
+    if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { 
+      Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green 
+    } else {  
       Write-Host "Could not reset the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
       pause
     }
@@ -1645,7 +1646,7 @@ if (Test-InternetConnection) { # Check for an internet connection
   $xaml= @"  
 <Window xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'  
   xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'  
-  Title='Choose Apps to Install' Height='520' Width='400'  
+  Title='Choose Apps to Install' Height='540' Width='570'  
   WindowStartupLocation='CenterScreen'  
   ResizeMode='NoResize'>  
     <Window.Resources>  
@@ -1680,14 +1681,21 @@ if (Test-InternetConnection) { # Check for an internet connection
           <RowDefinition Height='*'/>  
           <RowDefinition Height='Auto'/>   
         </Grid.RowDefinitions>  
-          <Button Name="SelectAllButton" Content="Select All" Grid.Row="0" Width="80" Height="35" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" FontSize="14" />
-          <Button Name="ClearAllButton" Content="Clear All" Grid.Row="0" Width="80" Height="35" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,55,10,0" FontSize="14" />
-          <StackPanel Grid.Row="0" Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="3*" />
+          <ColumnDefinition Width='4*' />
+        </Grid.ColumnDefinitions>
+          <Button Name="SelectAllButton" Content="Select All" Grid.Row="0" Grid.Column="1" Width="80" Height="35" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" FontSize="14" />
+          <Button Name="ClearAllButton" Content="Clear All" Grid.Row="0" Grid.Column="1" Width="80" Height="35" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,55,10,0" FontSize="14" />
+          <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,10">
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="ChromeBox" Content="Google Chrome" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="FirefoxBox" Content="Mozilla Firefox" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="vivaldiBox" Content="Vivaldi" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="DiscordBox" Content="Discord" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
@@ -1726,7 +1734,7 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="epicgamesBox" Content="Epic Games Launcher" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="afterburnerBox" Content="MSI Afterburner" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+                <CheckBox Name="googleplaygamesBox" Content="Google Play Games" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="signalrgbBox" Content="SignalRgb" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
@@ -1735,7 +1743,48 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="pythonBox" Content="Python 3.13" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
           </StackPanel>
-        <Button Name='SelectButton' Content='Proceed' Grid.Row='1' Width='90' Height="45" VerticalAlignment="Bottom" HorizontalAlignment='Center' FontSize='18'/>  
+          <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,10">
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="afterburnerBox" Content="MSI Afterburner" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="crystalDiskInfoBox" Content="CrystalDiskInfo" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="cpuzBox" Content="CPU-Z" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="gpuzBox" Content="GPU-Z" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="hwinfoBox" Content="HWiNFO" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="hwMonitorBox" Content="HWMonitor" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="occtBox" Content="OCCT" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="realvncBox" Content="RealVNC (host)" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="tightvncBox" Content="TightVNC (client)" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="nomachineBox" Content="NoMachine" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="localsendBox" Content="LocalSend" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="tailscaleBox" Content="TailScale" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="jellyfinPlayerBox" Content="Jellyfin Media Player" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+          </StackPanel>
+        <Button Name='SelectButton' Content='Proceed' Grid.Row='1' Grid.ColumnSpan="2" Width='90' Height="45" VerticalAlignment="Bottom" HorizontalAlignment='Center' FontSize='18'/>  
     </Grid>  
 </Window>  
 "@  
@@ -1753,6 +1802,10 @@ if (Test-InternetConnection) { # Check for an internet connection
     "Mozilla Firefox" = @{
         checkBox = ($FirefoxBox = $Window.FindName("FirefoxBox"));
         wingetID = "Mozilla.Firefox";
+    }
+    "Vivaldi" = @{
+        checkBox = ($vivaldiBox = $Window.FindName("vivaldiBox"));
+        wingetID = "Vivaldi.Vivaldi";
     }
     "Discord" = @{
         checkBox = ($DiscordBox = $Window.FindName("DiscordBox"));
@@ -1802,9 +1855,9 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($epicgamesBox = $Window.FindName("epicgamesBox"));
         wingetID = "EpicGames.EpicGamesLauncher";
     }
-    "MSI Afterburner" = @{
-        checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
-        wingetID = "MSI.Afterburner";
+    "Google Play Games" = @{
+        checkBox = ($googleplaygamesBox = $Window.FindName("googleplaygamesBox"));
+        wingetID = "Google.PlayGames.Beta";
     }
     "SignalRgb" = @{
         checkBox = ($signalrgbBox = $Window.FindName("signalrgbBox"));
@@ -1813,6 +1866,58 @@ if (Test-InternetConnection) { # Check for an internet connection
     "Python 3.13" = @{
         checkBox = ($pythonBox = $Window.FindName("pythonBox"));
         wingetID = "Python.Python.3.13";
+    }
+    "MSI Afterburner" = @{
+        checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
+        wingetID = "MSI.Afterburner";
+    }
+    "CrystalDiskInfo" = @{
+        checkBox = ($crystaldiskinfoBox = $Window.FindName("crystalDiskInfoBox"));
+        wingetID = "CrystalDewWorld.CrystalDiskInfo";
+    }
+    "CPU-Z" = @{
+        checkBox = ($cpuzBox = $Window.FindName("cpuzBox"));
+        wingetID = "CPUID.CPU-Z";
+    }
+    "GPU-Z" = @{
+        checkBox = ($gpuzBox = $Window.FindName("gpuzBox"));
+        wingetID = "TechPowerUp.GPU-Z";
+    }
+    "HWiNFO" = @{
+        checkBox = ($hwinfoBox = $Window.FindName("hwinfoBox"));
+        wingetID = "REALiX.HWiNFO";
+    }
+    "HWMonitor" = @{
+        checkBox = ($hwMonitorBox = $Window.FindName("hwMonitorBox"));
+        wingetID = "CPUID.HWMonitor";
+    }
+    "OCCT" = @{
+        checkBox = ($occtBox = $Window.FindName("occtBox"));
+        wingetID = "OCBase.OCCT.Personal";
+    }
+    "RealVNC" = @{
+        checkBox = ($realvncBox = $Window.FindName("realvncBox"));
+        wingetID = "RealVNC.VNCServer";
+    }
+    "TightVNC" = @{
+        checkBox = ($tightvncBox = $Window.FindName("tightvncBox"));
+        wingetID = "GlavSoft.TightVNC";
+    }
+    "NoMachine" = @{
+        checkBox = ($nomachineBox = $Window.FindName("nomachineBox"));
+        wingetID = "NoMachine.NoMachine";
+    }
+    "LocalSend" = @{
+        checkBox = ($localsendBox = $Window.FindName("localsendBox"));
+        wingetID = "LocalSend.LocalSend";
+    }
+    "TailScale" = @{
+        checkBox = ($tailscaleBox = $Window.FindName("tailscaleBox"));
+        wingetID = "Tailscale.Tailscale";
+    }
+    "Jellyfin Media Player" = @{
+        checkBox = ($jellyfinPlayerBox = $Window.FindName("jellyfinPlayerBox"));
+        wingetID = "Jellyfin.JellyfinMediaPlayer";
     }
   }
 
