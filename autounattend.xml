@@ -1763,9 +1763,6 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="hwMonitorBox" Content="HWMonitor" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="occtBox" Content="OCCT" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
-            </Viewbox>
-            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="realvncBox" Content="RealVNC (host)" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
@@ -1861,7 +1858,7 @@ if (Test-InternetConnection) { # Check for an internet connection
     }
     "SignalRgb" = @{
         checkBox = ($signalrgbBox = $Window.FindName("signalrgbBox"));
-        wingetID = "WhirlwindFX.SignalRGB";
+        wingetID = "WhirlwindFX.SignalRgb";
     }
     "Python 3.13" = @{
         checkBox = ($pythonBox = $Window.FindName("pythonBox"));
@@ -1869,7 +1866,7 @@ if (Test-InternetConnection) { # Check for an internet connection
     }
     "MSI Afterburner" = @{
         checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
-        wingetID = "MSI.Afterburner";
+        wingetID = "Guru3D.Afterburner";
     }
     "CrystalDiskInfo" = @{
         checkBox = ($crystaldiskinfoBox = $Window.FindName("crystalDiskInfoBox"));
@@ -1890,10 +1887,6 @@ if (Test-InternetConnection) { # Check for an internet connection
     "HWMonitor" = @{
         checkBox = ($hwMonitorBox = $Window.FindName("hwMonitorBox"));
         wingetID = "CPUID.HWMonitor";
-    }
-    "OCCT" = @{
-        checkBox = ($occtBox = $Window.FindName("occtBox"));
-        wingetID = "OCBase.OCCT.Personal";
     }
     "RealVNC" = @{
         checkBox = ($realvncBox = $Window.FindName("realvncBox"));
