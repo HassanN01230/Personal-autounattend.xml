@@ -1720,37 +1720,88 @@ if (Test-InternetConnection) { # Check for an internet connection
   $SelectAllButton = $Window.FindName("SelectAllButton")     # Find button controls  
   $ClearAllButton = $Window.FindName("ClearAllButton")    
 
-  $optionBoxes = [ordered]@{   # hashtable/dictionary of the display name of an app with its corresponding control in the GUI
-    "Google Chrome" = ($ChromeBox = $Window.FindName("ChromeBox"));
-    "Mozilla Firefox" = ($FirefoxBox = $Window.FindName("FirefoxBox"));
-    "Discord" = ($DiscordBox = $Window.FindName("DiscordBox"));
-    "VLC" = ($VLCBox = $Window.FindName("VLCBox"));
-    "VSCode" = ($VSCodeBox = $Window.FindName("VSCodeBox"));
-    "Office 365 Suite" = ($officeBox = $Window.FindName("officeBox"));
-    "OBS" = ($OBSBox = $Window.FindName("OBSBox"));
-    "7-Zip" = ($zipBox = $Window.FindName("zipBox"));
-    "PowerToys" = ($powertoysBox = $Window.FindName("powertoysBox"));
-    "NordVPN" = ($nordvpnBox = $Window.FindName("nordvpnBox"));
-    "HandBrake" = ($handbrakeBox = $Window.FindName("handbrakeBox"));
-    "QBittorrent" = ($qbittorrentBox = $Window.FindName("qbittorrentBox"));
-    "Steam" = ($steamBox = $Window.FindName("steamBox"));
-    "Epic Games Launcher" = ($epicgamesBox = $Window.FindName("epicgamesBox"));
-    "MSI Afterburner" = ($afterburnerBox = $Window.FindName("afterburnerBox"));
-    "SignalRgb" = ($signalrgbBox = $Window.FindName("signalrgbBox"));
-    "Python 3.13" = ($pythonBox = $Window.FindName("pythonBox"));
+  $optionBoxes = [ordered]@{     # hashtable/dictionary of the display name of an app with its corresponding control in the GUI and also its winget ID
+    "Google Chrome" = @{
+        checkBox = ($ChromeBox = $Window.FindName("ChromeBox"));
+        wingetID = "Google.Chrome";
+    }
+    "Mozilla Firefox" = @{
+        checkBox = ($FirefoxBox = $Window.FindName("FirefoxBox"));
+        wingetID = "Mozilla.Firefox";
+    }
+    "Discord" = @{
+        checkBox = ($DiscordBox = $Window.FindName("DiscordBox"));
+        wingetID = "Discord.Discord";
+    }
+    "VLC Media Player" = @{
+        checkBox = ($VLCBox = $Window.FindName("VLCBox"));
+        wingetID = "VideoLAN.VLC";
+    }
+    "Visual Studio Code" = @{
+        checkBox = ($VSCodeBox = $Window.FindName("VSCodeBox"));
+        wingetID = "Microsoft.VisualStudioCode";
+    }
+    "Microsoft 365 Apps" = @{
+        checkBox = ($officeBox = $Window.FindName("officeBox"));
+        wingetID = "Microsoft.Office";
+    }
+    "OBS Studio" = @{
+        checkBox = ($OBSBox = $Window.FindName("OBSBox"));
+        wingetID = "OBSProject.OBSStudio";
+    }
+    "7-Zip" = @{
+        checkBox = ($zipBox = $Window.FindName("zipBox"));
+        wingetID = "7zip.7zip";
+    }
+    "PowerToys" = @{
+        checkBox = ($powertoysBox = $Window.FindName("powertoysBox"));
+        wingetID = "Microsoft.PowerToys";
+    }
+    "NordVPN" = @{
+        checkBox = ($nordvpnBox = $Window.FindName("nordvpnBox"));
+        wingetID = "NordSecurity.NordVPN";
+    }
+    "HandBrake" = @{
+        checkBox = ($handbrakeBox = $Window.FindName("handbrakeBox"));
+        wingetID = "HandBrake.HandBrake";
+    }
+    "QBittorrent" = @{
+        checkBox = ($qbittorrentBox = $Window.FindName("qbittorrentBox"));
+        wingetID = "qBittorrent.qBittorrent";
+    }
+    "Steam" = @{
+        checkBox = ($steamBox = $Window.FindName("steamBox"));
+        wingetID = "Valve.Steam";
+    }
+    "Epic Games Launcher" = @{
+        checkBox = ($epicgamesBox = $Window.FindName("epicgamesBox"));
+        wingetID = "EpicGames.EpicGamesLauncher";
+    }
+    "MSI Afterburner" = @{
+        checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
+        wingetID = "MSI.Afterburner";
+    }
+    "SignalRgb" = @{
+        checkBox = ($signalrgbBox = $Window.FindName("signalrgbBox"));
+        wingetID = "WhirlwindFX.SignalRGB";
+    }
+    "Python 3.13" = @{
+        checkBox = ($pythonBox = $Window.FindName("pythonBox"));
+        wingetID = "Python.Python.3.13";
+    }
   }
 
   foreach ($box in $optionBoxes.Values) {    # Set initial checkbox states with default to false  
-    $box.IsChecked = $false
+    $box.checkBox.IsChecked = $false
   }
   $SelectAllButton.Add_Click({   # "Select All" button functionality to check all the boxes
     foreach ($box in $optionBoxes.Values) {
-      $box.IsChecked = $true
+      $box.checkBox.IsChecked = $true
     }
   })
   $ClearAllButton.Add_Click({    # "Clear All" button functionality to clear all the checkboxes
     foreach ($box in $optionBoxes.Values) {
-      $box.IsChecked = $false
+      $box.checkBox.IsChecked = $false
     }
   })
 
@@ -1759,12 +1810,12 @@ if (Test-InternetConnection) { # Check for an internet connection
 
   $selectedApps = @() # Initialize a list for selected applications
   foreach ($app in $optionBoxes.Keys) {
-    if ($optionBoxes[$app].IsChecked) { 
+    if ($optionBoxes[$app].checkBox.IsChecked) { 
       $selectedApps += $app 
     }
   }
   if ($selectedApps.Count -gt 0) { # Display selected apps or indicate none selected
-    Write-Host "`nAs you chose, the following apps will be installed: "
+    Write-Host "`nThe following apps will be installed: "
     Write-Host ($selectedApps -join ", ")
   } else { Write-Host "`nNo applications were selected for installation." }
 
@@ -1773,7 +1824,7 @@ if (Test-InternetConnection) { # Check for an internet connection
     if ($powertoysBox.IsChecked) { Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
 
     Write-Host "`nUsing winget to install $appName. Starting installation..."
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 1
 
     try {
       $process = Start-Process winget -ArgumentList "install --id=$wingetID -e --silent --force --verbose --accept-source-agreements --accept-package-agreements" -WindowStyle Hidden -PassThru -ErrorAction Stop
@@ -1788,241 +1839,119 @@ if (Test-InternetConnection) { # Check for an internet connection
         return 0
       }
     } catch {
-      return 0
       $global:no_issues = 0
       Write-Host "Error occurred while installing $appName... (writing details to log file)" 2>$null
       Log-Error "An error occured while installing $appName... $_.Exception.Message"
+      return 0
     }
   }
-  
-  if ($ChromeBox.IsChecked) {
-    $appName = "Google Chrome"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Google.Chrome"
 
-      if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt installing chrome if winget doesnt work and there is internet connection still
-        Start-Sleep -Seconds 5
-        if (Test-InternetConnection) {
-          Write-Host "Internet connection still exists!`nAttempting to install $appName again but through the web..."
-          try {
-            $Url = "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi"  # Define the URL 
-            $destinationFolderPath = "$env:userprofile\Downloads\ChromeStandaloneSetup64.msi"  # Where the .MSI file will download
-            Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
-            Write-Host "$appName file copied successfully from the Web. Starting silent installation..."
+  foreach ($appToPotentiallyInstall in $optionBoxes.Keys) {               # apps installation occurs here!!!!
+    if (optionBoxes[$appToPotentiallyInstall].checkBox.IsChecked) {
+      if (-not (CheckProgramInstallation $appToPotentiallyInstall)) {
+        $result = Winget-Install $appToPotentiallyInstall optionBoxes[$appToPotentiallyInstall].wingetID
 
-            $process = Start-Process msiexec.exe -ArgumentList "/i `"$destinationFolderPath`" /quiet /norestart" -Verb RunAs -PassThru
-            $process | Wait-Process
-            Start-Sleep -Seconds 2
-            Write-Host "$appName has been installed silently."
-            Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
+        if ($appToPotentiallyInstall -eq "Google Chrome") {      # Custom measures just for this app!!!!!
+          if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt installing chrome if winget doesnt work and there is internet connection still
+            Start-Sleep -Seconds 5
+            if (Test-InternetConnection) {
+              Write-Host "Internet connection still exists!`nAttempting to install $appToPotentiallyInstall again but through the web..."
+              try {
+                $Url = "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi"  # Define the URL 
+                $destinationFolderPath = "$env:userprofile\Downloads\ChromeStandaloneSetup64.msi"  # Where the .MSI file will download
+                Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
+                Write-Host "$appToPotentiallyInstall file copied successfully from the Web. Starting silent installation..."
 
-          } catch {
-            Write-Host "Still could not install $appName even through the web..."
-            $global:no_issues = 0
-            Log-Error "Failed to download or install $appName... $_.Exception.Message"
+                $process = Start-Process msiexec.exe -ArgumentList "/i `"$destinationFolderPath`" /quiet /norestart" -Verb RunAs -PassThru
+                $process | Wait-Process
+                Start-Sleep -Seconds 2
+                Write-Host "$appToPotentiallyInstall has been installed silently."
+                Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
+
+              } catch {
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                $global:no_issues = 0
+                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
+              }
+            }
           }
+          Write-Host "Installing some Ad-blocking extensions through Group Policy..."
+          $null = gpupdate /force 
+          New-Item -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Force | Out-Null  #Create the regkey path first
+          New-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Name "2" -Value "ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null  #ublock origin lite
+          New-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Name "3" -Value "gighmmpiobklfepjocnamgkkbiglidom;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null   #adblock
+          $null = gpupdate /force #forcefully update group policy so chrome installs these extensions next time its opened
         }
-      }
 
-      Write-Host "Installing some Ad-blocking extensions through Group Policy..."
-      $null = gpupdate /force 
-      New-Item -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Force | Out-Null  #Create the regkey path first
-      New-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Name "1" -Value "cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null  #ublock origin
-      New-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Name "2" -Value "ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null  #ublock origin lite
-      New-ItemProperty -Path "HKCU:\Software\Policies\Google\Chrome\ExtensionInstallForcelist" -Name "3" -Value "gighmmpiobklfepjocnamgkkbiglidom;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null   #adblock
-      $null = gpupdate /force #forcefully update group policy so chrome installs these extensions next time its opened
+        if ($appToPotentiallyInstall -eq "Mozilla Firefox") {        # Custom measures just for this app!!!!!
+          if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt install if winget doesnt work and there is internet connection still
+            Start-Sleep -Seconds 5
+            if (Test-InternetConnection) {
+              Write-Host "Internet connection still exists!`nAttempting to install $appToPotentiallyInstall again but through the web..."
+              try {
+                $Url = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US"  # Define the URL
+                $destinationFolderPath = "$env:userprofile\Downloads\Firefox.exe"  # Where the file will download
+                Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
+                Write-Host "$appToPotentiallyInstall file copied successfully from the Web. Starting silent installation..."
 
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
+                $process = Start-Process -FilePath $destinationFolderPath -ArgumentList "/S" -Verb RunAs -PassThru
+                $process | Wait-Process
+                Start-Sleep -Seconds 2
+                Write-Host "$appToPotentiallyInstall has been installed silently."
+                Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
 
-  if ($FirefoxBox.IsChecked) {
-    $appName = "Mozilla Firefox"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Mozilla.Firefox"
-
-      if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt install if winget doesnt work and there is internet connection still
-        Start-Sleep -Seconds 5
-        if (Test-InternetConnection) {
-          Write-Host "Internet connection still exists!`nAttempting to install $appName again but through the web..."
-          try {
-            $Url = "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US"  # Define the URL
-            $destinationFolderPath = "$env:userprofile\Downloads\Firefox.exe"  # Where the file will download
-            Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
-            Write-Host "$appName file copied successfully from the Web. Starting silent installation..."
-
-            $process = Start-Process -FilePath $destinationFolderPath -ArgumentList "/S" -Verb RunAs -PassThru
-            $process | Wait-Process
-            Start-Sleep -Seconds 2
-            Write-Host "$appName has been installed silently."
-            Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
-
-          } catch {
-            Write-Host "Still could not install $appName even through the web..."
-            $global:no_issues = 0
-            Log-Error "Failed to download or install $appName... $_.Exception.Message"
+              } catch {
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                $global:no_issues = 0
+                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
+              }
+            }
           }
+          Write-Host "Installing uBlock Origin extension through Group Policy..."
+          $null = gpupdate /force 
+          New-Item -Path "HKCU:\Software\Policies\Mozilla\Firefox\Extensions\Install" -Force | Out-Null  #Create the regkey path first
+          New-ItemProperty -Path "HKCU:\Software\Policies\Mozilla\Firefox\Extensions\Install" -Name "1" -Value "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/addon-607454-latest.xpi" -PropertyType String -Force | Out-Null  #ublock origin
+          $null = gpupdate /force #forcefully update group policy so firefox installs it next time its opened
         }
-      }
 
-      Write-Host "Installing uBlock Origin extension through Group Policy..."
-      $null = gpupdate /force 
-      New-Item -Path "HKCU:\Software\Policies\Mozilla\Firefox\Extensions\Install" -Force | Out-Null  #Create the regkey path first
-      New-ItemProperty -Path "HKCU:\Software\Policies\Mozilla\Firefox\Extensions\Install" -Name "1" -Value "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/addon-607454-latest.xpi" -PropertyType String -Force | Out-Null  #ublock origin
-      $null = gpupdate /force #forcefully update group policy so firefox installs it next time its opened
+        if ($appToPotentiallyInstall -eq "Discord") {        # Custom measures just for this app!!!!!
+          if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt install if winget doesnt work and there is internet connection still
+            Start-Sleep -Seconds 5
+            if (Test-InternetConnection) {
+              Write-Host "Internet connection still exists!`nAttempting to install $appToPotentiallyInstall again but through the web..."
+              try {
+                $Url = "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable&platform=win&arch=x64"  # Define the UR
+                $destinationFolderPath = "$env:userprofile\Downloads\DiscordSetup.exe"  # Where the file will download
+                Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
+                Write-Host "$appToPotentiallyInstall file copied successfully from the Web. Starting silent installation..."
 
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
+                $process = Start-Process -FilePath $destinationFolderPath -ArgumentList "/S" -Verb RunAs -PassThru
+                $process | Wait-Process
+                Start-Sleep -Seconds 2
+                Write-Host "$appToPotentiallyInstall has been installed silently."
+                Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
+                Start-Sleep -Seconds 2
+                Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..."
 
-  if ($DiscordBox.IsChecked) {
-    $appName = "Discord"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Discord.Discord"
+              } catch {
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                $global:no_issues = 0
+                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
+              }
+            }
+          } else { Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..." }
 
-      if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt install if winget doesnt work and there is internet connection still
-        Start-Sleep -Seconds 5
-        if (Test-InternetConnection) {
-          Write-Host "Internet connection still exists!`nAttempting to install $appName again but through the web..."
-          try {
-            $Url = "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable&platform=win&arch=x64"  # Define the UR
-            $destinationFolderPath = "$env:userprofile\Downloads\DiscordSetup.exe"  # Where the file will download
-            Start-BitsTransfer -Source $Url -Destination $destinationFolderPath -ErrorAction Stop  # Download the MSI
-            Write-Host "$appName file copied successfully from the Web. Starting silent installation..."
-
-            $process = Start-Process -FilePath $destinationFolderPath -ArgumentList "/S" -Verb RunAs -PassThru
-            $process | Wait-Process
-            Start-Sleep -Seconds 2
-            Write-Host "$appName has been installed silently."
-            Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
-            Start-Sleep -Seconds 2
-            Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..."
-
-          } catch {
-            Write-Host "Still could not install $appName even through the web..."
-            $global:no_issues = 0
-            Log-Error "Failed to download or install $appName... $_.Exception.Message"
-          }
+          Start-Sleep -Seconds 7
+          Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
+          if (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
+          if (Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
         }
-      } else { Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..." }
-
-      Start-Sleep -Seconds 7
-      Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
-      if (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
-      if (Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
-      
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($VLCBox.IsChecked) {
-    $appName = "VLC Media Player"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "VideoLAN.VLC"
-      
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($VSCodeBox.IsChecked) {
-    $appName = "Visual Studio Code"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Microsoft.VisualStudioCode"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($officeBox.IsChecked) {
-    $appName = "Microsoft 365 Apps"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Microsoft.Office"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($OBSBox.IsChecked) {
-    $appName = "OBS Studio"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "OBSProject.OBSStudio"
-      
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($zipBox.IsChecked) {
-    $appName = "7-Zip"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "7zip.7zip"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($powertoysBox.IsChecked) {
-    $appName = "PowerToys"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Microsoft.PowerToys"
-      Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($nordvpnBox.IsChecked) {
-    $appName = "NordVPN"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "NordSecurity.NordVPN"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($handbrakeBox.IsChecked) {
-    $appName = "HandBrake"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "HandBrake.HandBrake"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($qbittorrentBox.IsChecked) {
-    $appName = "QBittorrent"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "qBittorrent.qBittorrent"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($steamBox.IsChecked) {
-    $appName = "Steam"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Valve.Steam"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($epicgamesBox.IsChecked) {
-    $appName = "Epic Games Launcher"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "EpicGames.EpicGamesLauncher"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($afterburnerBox.IsChecked) {
-    $appName = "MSI Afterburner"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Guru3D.Afterburner"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($signalrgbBox.IsChecked) {
-    $appName = "SignalRgb"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "WhirlwindFX.SignalRgb"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
-  }
-
-  if ($pythonBox.IsChecked) {
-    $appName = "Python 3.13"
-    if (-not (CheckProgramInstallation $appName)) {
-      $result = Winget-Install $appName "Python.Python.3.13"
-
-    } else { Write-Host "`n$appName already exists, skipping installation..." }
+        if ($appToPotentiallyInstall -eq "PowerToys") { # Custom measures just for this app!!!!!
+          Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
+        }
+        
+      } else { Write-Host "`n$appToPotentiallyInstall already exists, skipping installation..." }
+    }
   }
 
   Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "AppsInstallOnly" -Force -ErrorAction SilentlyContinue  # Deleting the key as installation is done  
