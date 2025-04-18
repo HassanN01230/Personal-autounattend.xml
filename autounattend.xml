@@ -1618,7 +1618,7 @@ if (Test-InternetConnection) { # Check for an internet connection
 
   try {  # Try to check if 'winget' is available 
     if (Get-Command winget -ErrorAction SilentlyContinue) {
-      Write-Host "`nWinget is already installed. Version: $(winget --version)"
+      Write-Host "`nWinget is installed. Version: $(winget --version)`nUpdating Sources..."
     }
   } catch {
     Write-Host "`nWinget not found! Installing it now..."
@@ -1638,7 +1638,7 @@ if (Test-InternetConnection) { # Check for an internet connection
       } catch { Write-Host "An error occured while attempting to install from the second source.." }
     }
   }
-
+  $null = winget source update  # update winget sources
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::Machine)
   $global:no_issues = 1
@@ -1952,6 +1952,8 @@ if (Test-InternetConnection) { # Check for an internet connection
   function Winget-Install { param( [string]$appName, [string]$wingetID )
     if ($DiscordBox.IsChecked) { Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
     if ($powertoysBox.IsChecked) { Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
+    if ($hwinfoBox.IsChecked) { Get-Process -Name "*HWiNFO*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
+    
 
     Write-Host "`nUsing winget to install $appName. Starting installation..."
     Start-Sleep -Seconds 1
@@ -2071,13 +2073,18 @@ if (Test-InternetConnection) { # Check for an internet connection
             }
           } else { Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..." }
 
-          Start-Sleep -Seconds 7
+          Start-Sleep -Seconds 8
           Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
           if (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
           if (Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
         }
+
         if ($appToPotentiallyInstall -eq "PowerToys") { # Custom measures just for this app!!!!!
           Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
+        }
+
+        if ($appToPotentiallyInstall -eq "HWiNFO") { # Custom measures just for this app!!!!!
+          Get-Process -Name "*HWiNFO*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
         }
         
       } else { Write-Host "`n$appToPotentiallyInstall already exists, skipping installation..." }
