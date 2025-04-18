@@ -1567,20 +1567,21 @@ if (Test-InternetConnection) { # Check for an internet connection
   Add-Type -AssemblyName WindowsBase
   Add-Type -AssemblyName System.Windows.Forms
 
+  $ProgressPreference = 'SilentlyContinue'  #used to hide progress bar in invoke-webrequest and start-bitstransfer
   try {
     Write-Host "`nResetting and preparing the Microsoft Store..."
     Get-AppxPackage -Name "Microsoft.WindowsStore" | Remove-AppxPackage  #first remove the current microsoft store 
     Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -PassThru -ErrorAction Stop | Out-Null  #then reset the microsoft store so it is reinstalled with dependencies
     $attempts = 0
     while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
-      Start-Sleep -Seconds 5
+      Start-Sleep -Seconds 1
       $attempts++
-      if ($attempts -ge 25) { 
+      if ($attempts -ge 200) { 
         Write-Host "Microsoft Store installation timeout..." -ForegroundColor Red
         break
       }
     }
-    if (-not ($attempts -ge 15)) { Write-Host "Successfully reset the Microsoft Store!" }
+    if (-not ($attempts -ge 200)) { Write-Host "Successfully reset the Microsoft Store!" }
   } catch {
     Write-Host "Resetting Microsoft Store failed! Retrying..."
     try {
@@ -1590,7 +1591,6 @@ if (Test-InternetConnection) { # Check for an internet connection
     } catch { Write-Host "Retry failed. Could not reset the Microsoft Store..." }
   }
 
-  $ProgressPreference = 'SilentlyContinue'  #used to hide progress bar in invoke-webrequest and start-bitstransfer
   try {  # Try to check if 'winget' is available by running 'winget --version'
     $wingetVersion = winget --version
     Write-Host "`nWinget is already installed. Version: $wingetVersion"
@@ -1717,106 +1717,52 @@ if (Test-InternetConnection) { # Check for an internet connection
   $reader = [System.Xml.XmlReader]::Create([System.IO.StringReader]$xaml)  # Load and parse the XAML
   $Window = [Windows.Markup.XamlReader]::Load($reader) 
   $SelectButton = $Window.FindName("SelectButton")  
-  $SelectAllButton = $Window.FindName("SelectAllButton")
+  $SelectAllButton = $Window.FindName("SelectAllButton")     # Find button controls  
   $ClearAllButton = $Window.FindName("ClearAllButton")    
-  $ChromeBox = $Window.FindName("ChromeBox")  
-  $FirefoxBox = $Window.FindName("FirefoxBox")    # Find controls  
-  $DiscordBox = $Window.FindName("DiscordBox")  
-  $VLCBox = $Window.FindName("VLCBox")  
-  $VSCodeBox= $Window.FindName("VSCodeBox")  
-  $officeBox= $Window.FindName("officeBox")  
-  $OBSBox= $Window.FindName("OBSBox")  
-  $zipBox= $Window.FindName("zipBox") 
-  $powertoysBox= $Window.FindName("powertoysBox")  
-  $nordvpnBox= $Window.FindName("nordvpnBox")   
-  $handbrakeBox= $Window.FindName("handbrakeBox")
-  $qbittorrentBox= $Window.FindName("qbittorrentBox")  
-  $steamBox= $Window.FindName("steamBox")  
-  $epicgamesBox= $Window.FindName("epicgamesBox")  
-  $afterburnerBox= $Window.FindName("afterburnerBox")  
-  $signalrgbBox= $Window.FindName("signalrgbBox") 
-  $pythonBox= $Window.FindName("pythonBox")   
 
-  $ChromeBox.IsChecked = $false 
-  $FirefoxBox.IsChecked = $false    # Set initial checkbox states with default to false  
-  $DiscordBox.IsChecked = $false  
-  $VLCBox.IsChecked = $false  
-  $VSCodeBox.IsChecked = $false  
-  $officeBox.IsChecked = $false 
-  $OBSBox.IsChecked = $false  
-  $zipBox.IsChecked = $false  
-  $powertoysBox.IsChecked = $false  
-  $nordvpnBox.IsChecked = $false  
-  $handbrakeBox.IsChecked = $false
-  $qbittorrentBox.IsChecked = $false  
-  $steamBox.IsChecked = $false  
-  $epicgamesBox.IsChecked = $false  
-  $afterburnerBox.IsChecked = $false  
-  $signalrgbBox.IsChecked = $false  
-  $pythonBox.IsChecked = $false  
+  $optionBoxes = [ordered]@{   # hashtable/dictionary of the display name of an app with its corresponding control in the GUI
+    "Google Chrome" = ($ChromeBox = $Window.FindName("ChromeBox"));
+    "Mozilla Firefox" = ($FirefoxBox = $Window.FindName("FirefoxBox"));
+    "Discord" = ($DiscordBox = $Window.FindName("DiscordBox"));
+    "VLC" = ($VLCBox = $Window.FindName("VLCBox"));
+    "VSCode" = ($VSCodeBox = $Window.FindName("VSCodeBox"));
+    "Office 365 Suite" = ($officeBox = $Window.FindName("officeBox"));
+    "OBS" = ($OBSBox = $Window.FindName("OBSBox"));
+    "7-Zip" = ($zipBox = $Window.FindName("zipBox"));
+    "PowerToys" = ($powertoysBox = $Window.FindName("powertoysBox"));
+    "NordVPN" = ($nordvpnBox = $Window.FindName("nordvpnBox"));
+    "HandBrake" = ($handbrakeBox = $Window.FindName("handbrakeBox"));
+    "QBittorrent" = ($qbittorrentBox = $Window.FindName("qbittorrentBox"));
+    "Steam" = ($steamBox = $Window.FindName("steamBox"));
+    "Epic Games Launcher" = ($epicgamesBox = $Window.FindName("epicgamesBox"));
+    "MSI Afterburner" = ($afterburnerBox = $Window.FindName("afterburnerBox"));
+    "SignalRgb" = ($signalrgbBox = $Window.FindName("signalrgbBox"));
+    "Python 3.13" = ($pythonBox = $Window.FindName("pythonBox"));
+  }
 
+  foreach ($box in $optionBoxes.Values) {    # Set initial checkbox states with default to false  
+    $box.IsChecked = $false
+  }
   $SelectAllButton.Add_Click({   # "Select All" button functionality to check all the boxes
-    $ChromeBox.IsChecked = $true
-    $FirefoxBox.IsChecked = $true
-    $DiscordBox.IsChecked = $true
-    $VLCBox.IsChecked = $true
-    $VSCodeBox.IsChecked = $true
-    $officeBox.IsChecked = $true 
-    $OBSBox.IsChecked = $true
-    $zipBox.IsChecked = $true
-    $powertoysBox.IsChecked = $true
-    $nordvpnBox.IsChecked = $true
-    $handbrakeBox.IsChecked = $true
-    $qbittorrentBox.IsChecked = $true
-    $steamBox.IsChecked = $true
-    $epicgamesBox.IsChecked = $true
-    $afterburnerBox.IsChecked = $true
-    $signalrgbBox.IsChecked = $true
-    $pythonBox.IsChecked = $true
+    foreach ($box in $optionBoxes.Values) {
+      $box.IsChecked = $true
+    }
   })
-
   $ClearAllButton.Add_Click({    # "Clear All" button functionality to clear all the checkboxes
-    $ChromeBox.IsChecked = $false
-    $FirefoxBox.IsChecked = $false
-    $DiscordBox.IsChecked = $false
-    $VLCBox.IsChecked = $false
-    $VSCodeBox.IsChecked = $false
-    $officeBox.IsChecked = $false 
-    $OBSBox.IsChecked = $false
-    $zipBox.IsChecked = $false
-    $powertoysBox.IsChecked = $false
-    $nordvpnBox.IsChecked = $false
-    $handbrakeBox.IsChecked = $false
-    $qbittorrentBox.IsChecked = $false
-    $steamBox.IsChecked = $false
-    $epicgamesBox.IsChecked = $false
-    $afterburnerBox.IsChecked = $false 
-    $signalrgbBox.IsChecked = $false  
-    $pythonBox.IsChecked = $false  
+    foreach ($box in $optionBoxes.Values) {
+      $box.IsChecked = $false
+    }
   })
 
   $SelectButton.Add_Click({ $Window.close() })    # Close the window when users clicks the "Proceed" button 
   $Window.ShowDialog() | Out-Null  
 
   $selectedApps = @() # Initialize a list for selected applications
-  if ($ChromeBox.IsChecked) { $selectedApps += "Google Chrome" }
-  if ($FirefoxBox.IsChecked) { $selectedApps += "Mozilla Firefox" }
-  if ($DiscordBox.IsChecked) { $selectedApps += "Discord" }
-  if ($VLCBox.IsChecked) { $selectedApps += "VLC" }
-  if ($VSCodeBox.IsChecked) { $selectedApps += "VSCode" }
-  if ($officeBox.IsChecked) { $selectedApps += "Office 365 Suite" }
-  if ($OBSBox.IsChecked) { $selectedApps += "OBS" }
-  if ($zipBox.IsChecked) { $selectedApps += "7-Zip" }
-  if ($powertoysBox.IsChecked) { $selectedApps += "PowerToys" }
-  if ($nordvpnBox.IsChecked) { $selectedApps += "NordVPN" }
-  if ($handbrakeBox.IsChecked) { $selectedApps += "HandBrake" }
-  if ($qbittorrentBox.IsChecked) { $selectedApps += "QBittorrent" }
-  if ($steamBox.IsChecked) { $selectedApps += "Steam" }
-  if ($epicgamesBox.IsChecked) { $selectedApps += "Epic Games Launcher" }
-  if ($afterburnerBox.IsChecked) { $selectedApps += "MSI Afterburner" }
-  if ($signalrgbBox.IsChecked) { $selectedApps += "SignalRgb" }
-  if ($pythonBox.IsChecked) { $selectedApps += "Python 3.13" }
-
+  foreach ($app in $optionBoxes.Keys) {
+    if ($optionBoxes[$app].IsChecked) { 
+      $selectedApps += $app 
+    }
+  }
   if ($selectedApps.Count -gt 0) { # Display selected apps or indicate none selected
     Write-Host "`nAs you chose, the following apps will be installed: "
     Write-Host ($selectedApps -join ", ")
@@ -2096,11 +2042,11 @@ if (Test-InternetConnection) { # Check for an internet connection
   Remove-Item -Path "C:\`$Windows.~ws" -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ESD" -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ProgramData\Package Cache" -Recurse -Force -ErrorAction SilentlyContinue   # cache files from winget installations
-  Remove-Item -Path "C:\Program Files (x86)\Microsoft\Edge*" -Recurse -Force -ErrorAction SilentlyContinue
+  # Remove-Item -Path "C:\Program Files (x86)\Microsoft\Edge*" -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ProgramData\Microsoft\EdgeUpdate" -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -Path "C:\ProgramData\Mozilla-*" -Recurse -Force -ErrorAction SilentlyContinue  #if there is any temp mozilla cache
   Remove-Item -Path "$env:localappdata\Package Cache" -Recurse -Force -ErrorAction SilentlyContinue  # cache files from winget installations
-  Remove-Item -Path "$env:localappdata\Microsoft\Edge" -Recurse -Force -ErrorAction SilentlyContinue
+  # Remove-Item -Path "$env:localappdata\Microsoft\Edge" -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -Path "$env:localappdata\Microsoft\OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
   $null = Clear-RecycleBin -Force -ErrorAction SilentlyContinue # assigning to null so nothing gets printed
   Get-ChildItem -Path "C:\Windows" -Filter "*.dmp" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
