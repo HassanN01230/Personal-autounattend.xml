@@ -1573,58 +1573,45 @@ if (Test-InternetConnection) { # Check for an internet connection
     Get-AppxPackage -AllUsers -Name "Microsoft.WindowsStore" | Remove-AppxPackage -ErrorAction SilentlyContinue  #first remove the current microsoft store 
     Get-AppxPackage -allusers Microsoft.WindowsStore | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2
-    $method = 1
+    $tryMethod = 1
 
-    while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
-      if ($method -eq 1) {
-        try {
-          Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -ErrorAction Stop | Out-Null  #reset the microsoft store so it is reinstalled with dependencies
-          $timer = 0
-          while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
-            Start-Sleep -Seconds 1
-            $timer++
-            if ($timer -ge 60) { 
-              Write-Host "Microsoft Store reset timeout..." -ForegroundColor Red
-              $method = 2
-              break
-            }
+    if ($tryMethod -eq 1) {
+      try {
+        Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -ErrorAction Stop | Out-Null  #reset the microsoft store so it is reinstalled with dependencies
+        $timer = 0
+        while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
+          Start-Sleep -Seconds 1
+          $timer++
+          if ($timer -ge 60) { 
+            $tryMethod = 2
+            break
           }
-          if (-not ($timer -ge 60)) { Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green }
-        } catch { 
-          Write-Host "An error occured while attempting to reset Microsoft Store" 
-          $method = 2
         }
-      } elseif ($method -eq 2) {
-        Write-Host "`nTrying to reset the Microsoft Store again..." -ForegroundColor Cyan
-        try {
-          wsreset -i
-          Start-Sleep -Seconds 15
-          if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully reset the Microsoft Store on retry!" -ForegroundColor Green }
-          else {  
-            Write-Host "Retry failed. Could not reset the Microsoft Store..." -ForegroundColor Red
-            $method = 3
-          }
-        } catch { 
-          Write-Host "Retry failed. Could not reset the Microsoft Store..." -ForegroundColor Red
-          $method = 3
-        }
-      } elseif ($method -eq 3) {
-        Write-Host "`nAttempting to install the Microsoft Store" -ForegroundColor Cyan
-        $storePackage = "Microsoft.WindowsStore_8wekyb3d8bbwe"
-        $installCommand = "Get-AppxPackage -AllUsers *$storePackage* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register `$($_.InstallLocation)\AppXManifest.xml}"
-        Invoke-Expression $installCommand
+      } catch { $tryMethod = 2 }
+    }
+
+    if ($tryMethod -eq 2) {
+      try {
+        wsreset -i
         Start-Sleep -Seconds 15
-        if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully installed the Microsoft Store!" -ForegroundColor Green }
-        else {  
-          Write-Host "Could not install the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
-          pause
-          break
-        }
-      }
-      else { $method = 1 }  # if there is invalid method value somehow, go back to 1 so it'll go to 2 and then 3 and then break out of loop naturally if its the case
+        if (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) { $tryMethod = 3 }
+      } catch { $tryMethod = 3 }
+    }
+
+    if ($tryMethod -eq 3) {
+      $storePackage = "Microsoft.WindowsStore_8wekyb3d8bbwe"
+      $installCommand = "Get-AppxPackage -AllUsers *$storePackage* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register `$($_.InstallLocation)\AppXManifest.xml}"
+      Invoke-Expression $installCommand
+      Start-Sleep -Seconds 15
+    }
+    
+    if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green }
+    else {  
+      Write-Host "Could not reset the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
+      pause
     }
   } catch { 
-    Write-Host "Resetting Microsoft Store failed! Hit Enter to proceed with the rest of the process (it may not work)" 
+    Write-Host "Resetting Microsoft Store failed! Hit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
     Pause
   }
 
