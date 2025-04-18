@@ -1569,31 +1569,69 @@ if (Test-InternetConnection) { # Check for an internet connection
 
   $ProgressPreference = 'SilentlyContinue'  #used to hide progress bar in invoke-webrequest and start-bitstransfer
   try {
-    Write-Host "`nResetting and preparing the Microsoft Store..."
-    Get-AppxPackage -Name "Microsoft.WindowsStore" | Remove-AppxPackage  #first remove the current microsoft store 
-    Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -PassThru -ErrorAction Stop | Out-Null  #then reset the microsoft store so it is reinstalled with dependencies
-    $attempts = 0
+    Write-Host "`nResetting and preparing the Microsoft Store..." -ForegroundColor Cyan
+    Get-AppxPackage -AllUsers -Name "Microsoft.WindowsStore" | Remove-AppxPackage -ErrorAction SilentlyContinue  #first remove the current microsoft store 
+    Get-AppxPackage -allusers Microsoft.WindowsStore | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2
+    $method = 1
+
     while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
-      Start-Sleep -Seconds 1
-      $attempts++
-      if ($attempts -ge 200) { 
-        Write-Host "Microsoft Store installation timeout..." -ForegroundColor Red
-        break
+      if ($method -eq 1) {
+        try {
+          Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -ErrorAction Stop | Out-Null  #reset the microsoft store so it is reinstalled with dependencies
+          $timer = 0
+          while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
+            Start-Sleep -Seconds 1
+            $timer++
+            if ($timer -ge 60) { 
+              Write-Host "Microsoft Store reset timeout..." -ForegroundColor Red
+              $method = 2
+              break
+            }
+          }
+          if (-not ($timer -ge 60)) { Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green }
+        } catch { 
+          Write-Host "An error occured while attempting to reset Microsoft Store" 
+          $method = 2
+        }
+      } elseif ($method -eq 2) {
+        Write-Host "`nTrying to reset the Microsoft Store again..." -ForegroundColor Cyan
+        try {
+          wsreset -i
+          Start-Sleep -Seconds 15
+          if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully reset the Microsoft Store on retry!" -ForegroundColor Green }
+          else {  
+            Write-Host "Retry failed. Could not reset the Microsoft Store..." -ForegroundColor Red
+            $method = 3
+          }
+        } catch { 
+          Write-Host "Retry failed. Could not reset the Microsoft Store..." -ForegroundColor Red
+          $method = 3
+        }
+      } elseif ($method -eq 3) {
+        Write-Host "`nAttempting to install the Microsoft Store" -ForegroundColor Cyan
+        $storePackage = "Microsoft.WindowsStore_8wekyb3d8bbwe"
+        $installCommand = "Get-AppxPackage -AllUsers *$storePackage* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register `$($_.InstallLocation)\AppXManifest.xml}"
+        Invoke-Expression $installCommand
+        Start-Sleep -Seconds 15
+        if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { Write-Host "Successfully installed the Microsoft Store!" -ForegroundColor Green }
+        else {  
+          Write-Host "Could not install the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
+          pause
+          break
+        }
       }
+      else { $method = 1 }  # if there is invalid method value somehow, go back to 1 so it'll go to 2 and then 3 and then break out of loop naturally if its the case
     }
-    if (-not ($attempts -ge 200)) { Write-Host "Successfully reset the Microsoft Store!" }
-  } catch {
-    Write-Host "Resetting Microsoft Store failed! Retrying..."
-    try {
-      wsreset -i
-      Start-Sleep -Seconds 15
-      Write-Host "Successfully reset the Microsoft Store on retry!"
-    } catch { Write-Host "Retry failed. Could not reset the Microsoft Store..." }
+  } catch { 
+    Write-Host "Resetting Microsoft Store failed! Hit Enter to proceed with the rest of the process (it may not work)" 
+    Pause
   }
 
-  try {  # Try to check if 'winget' is available by running 'winget --version'
-    $wingetVersion = winget --version
-    Write-Host "`nWinget is already installed. Version: $wingetVersion"
+  try {  # Try to check if 'winget' is available 
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+      Write-Host "`nWinget is already installed. Version: $(winget --version)"
+    }
   } catch {
     Write-Host "`nWinget not found! Installing it now..."
     try {
@@ -1847,9 +1885,9 @@ if (Test-InternetConnection) { # Check for an internet connection
   }
 
   foreach ($appToPotentiallyInstall in $optionBoxes.Keys) {               # apps installation occurs here!!!!
-    if (optionBoxes[$appToPotentiallyInstall].checkBox.IsChecked) {
+    if ($optionBoxes[$appToPotentiallyInstall].checkBox.IsChecked) {
       if (-not (CheckProgramInstallation $appToPotentiallyInstall)) {
-        $result = Winget-Install $appToPotentiallyInstall optionBoxes[$appToPotentiallyInstall].wingetID
+        $result = Winget-Install $appToPotentiallyInstall $optionBoxes[$appToPotentiallyInstall].wingetID
 
         if ($appToPotentiallyInstall -eq "Google Chrome") {      # Custom measures just for this app!!!!!
           if (($result -eq 0) -or ($result -eq $null)) {  #Backup measure to attempt installing chrome if winget doesnt work and there is internet connection still
