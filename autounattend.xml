@@ -1617,9 +1617,8 @@ if (Test-InternetConnection) { # Check for an internet connection
   }
 
   try {  # Try to check if 'winget' is available 
-    if (Get-Command winget -ErrorAction SilentlyContinue) {
-      Write-Host "`nWinget is installed. Version: $(winget --version)`nUpdating Sources..."
-    }
+    winget --version
+    Write-Host "`nWinget is installed. Version: $(winget --version)`nUpdating Sources..."
   } catch {
     Write-Host "`nWinget not found! Installing it now..."
     try {
@@ -1638,7 +1637,7 @@ if (Test-InternetConnection) { # Check for an internet connection
       } catch { Write-Host "An error occured while attempting to install from the second source.." }
     }
   }
-  $null = winget source update  # update winget sources
+  $null = Invoke-Expression "winget source update" -ErrorAction SilentlyContinue # update winget sources
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::Machine)
   $global:no_issues = 1
