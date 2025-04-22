@@ -1945,29 +1945,29 @@ if (Test-InternetConnection) { # Check for an internet connection
     if ($DiscordBox.IsChecked) { Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
     if ($powertoysBox.IsChecked) { Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
     if ($hwinfoBox.IsChecked) { Get-Process -Name "*HWiNFO*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
-    
 
     Write-Host "`nUsing winget to install $appName. Starting installation..."
     Start-Sleep -Seconds 1
 
-    try {
-      $process = Start-Process winget -ArgumentList "install --id=$wingetID -e --silent --force --verbose --accept-source-agreements --accept-package-agreements" -WindowStyle Hidden -PassThru -ErrorAction Stop
-      $process | Wait-Process
-      Start-Sleep -Seconds 1
+    $tries = 0
+    while ($tries -lt 3) {
+      try {
+        $process = Start-Process winget -ArgumentList "install --id=$wingetID -e --silent --force --verbose --accept-source-agreements --accept-package-agreements" -WindowStyle Hidden -PassThru -ErrorAction Stop
+        $process | Wait-Process
+        Start-Sleep -Seconds 1
 
-      if ($process.ExitCode -eq 0) { 
-        Write-Host "$appName has been installed successfully!"
-        return 1
-      } else {
-        Write-Host "Error: winget installation for $appName failed with exit code $($process.ExitCode)"
-        return 0
-      }
-    } catch {
-      $global:no_issues = 0
-      Write-Host "Error occurred while installing $appName... (writing details to log file)" 2>$null
-      Log-Error "An error occured while installing $appName... $_.Exception.Message"
-      return 0
+        if ($process.ExitCode -eq 0) {
+          Write-Host "$appName has been installed successfully!"
+          return 1
+        } else { Write-Host "Attempt $($tries + 1): Winget install failed with exit code $($process.ExitCode)..." }
+      } catch { Write-Host "Attempt $($tries + 1): Exception occurred while installing $appName $($_.Exception.Message)..." }
+      $tries++
     }
+
+    $global:no_issues = 0
+    Write-Host "Failed to install $appName after 3 attempts." -ForegroundColor Red    # After all retries fail
+    Log-Error "Winget install failed for $appName after 3 attempts using ID: $wingetID"
+    return 0
   }
 
   foreach ($appToPotentiallyInstall in $optionBoxes.Keys) {               # apps installation occurs here!!!!
