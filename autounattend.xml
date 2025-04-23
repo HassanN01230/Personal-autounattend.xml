@@ -1175,6 +1175,8 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 :: Don't Update Last Access Time Stamp - This Can Improve File System Performance
 fsutil.exe behavior set disableLastAccess 1
 
+"C:\Windows\Resources\Themes\ThemeA.theme"   
+
 :: Disables Windows Recall on Copilot+ PC
 reg.exe add "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\WindowsAI" /f
 reg.exe add "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\WindowsAI" /v "DisableAIDataAnalysis" /t REG_DWORD /d 1 /f
@@ -1221,7 +1223,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Exit
   }
 }
-
+$Host.UI.RawUI.WindowTitle = "PostInstall"
 $desktopPath = [System.Environment]::GetFolderPath("Desktop") # Get the desktop path
 $logFilePath = "C:\Windows\Setup\Scripts\PostInstall_Log.log"  # Specify the path to your log file with hostname and timestamp
 Start-Transcript -Path $logFilePath -Append
@@ -1404,6 +1406,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Exit
   }
 }
+$Host.UI.RawUI.WindowTitle = "AppsInstall"
 $desktopPath = [System.Environment]::GetFolderPath("Desktop") # Get the desktop path
 $logFilePath = "C:\Windows\Setup\Scripts\AppsInstall_Log.log"  # Specify the path to your log file with hostname and timestamp
 Start-Transcript -Path $logFilePath -Append
@@ -1482,6 +1485,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Exit
   }
 }
+$Host.UI.RawUI.WindowTitle = "AppsInstall_only"
 $desktopPath = [System.Environment]::GetFolderPath("Desktop") # Get the desktop path
 $logFilePath = "C:\Windows\Setup\Scripts\AppsInstall_only_Log.log"  # Specify the path to your log file with hostname and timestamp
 Start-Transcript -Path $logFilePath -Append
@@ -1529,15 +1533,6 @@ function Test-InternetConnection {
     }
   }
   return $success
-}
-
-function Log-Error { param ([string]$Message)
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    $null = Stop-Transcript # Stop the transcript to write to the file manually
-    Start-Sleep -Seconds 3
-    Add-Content -Path $logFilePath -Value "$timestamp - ERROR: $Message"
-    Start-Sleep -Seconds 2
-    $null = Start-Transcript -Path $logFilePath -Append # Restart the transcript
 }
 
 function Retry-RemoveItem {
@@ -1943,8 +1938,9 @@ if (Test-InternetConnection) { # Check for an internet connection
 
   function Winget-Install { param( [string]$appName, [string]$wingetID )
     if ($DiscordBox.IsChecked) { Get-Process -Name "*Discord*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
-    if ($powertoysBox.IsChecked) { Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
+    if ($powertoysBox.IsChecked) { Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }           # if by chance any of these windows are still open in background from the installations, then close them so cleaner
     if ($hwinfoBox.IsChecked) { Get-Process -Name "*HWiNFO*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
+    if ($tailscaleBox.IsChecked) { Get-Process -Name "*TailScale*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue }
 
     Write-Host "`nUsing winget to install $appName. Starting installation..."
     Start-Sleep -Seconds 1
@@ -1959,14 +1955,13 @@ if (Test-InternetConnection) { # Check for an internet connection
         if ($process.ExitCode -eq 0) {
           Write-Host "$appName has been installed successfully!"
           return 1
-        } else { Write-Host "Attempt $($tries + 1): Winget install failed with exit code $($process.ExitCode)..." }
-      } catch { Write-Host "Attempt $($tries + 1): Exception occurred while installing $appName $($_.Exception.Message)..." }
+        } else { Write-Host "Attempt $($tries + 1): Winget install (with ID) failed with exit code $($process.ExitCode)..." }
+      } catch { Write-Host "Attempt $($tries + 1): Exception occurred while installing $appName (with ID) $($_.Exception.Message)..." }
       $tries++
     }
 
     $global:no_issues = 0
-    Write-Host "Failed to install $appName after 3 attempts." -ForegroundColor Red    # After all retries fail
-    Log-Error "Winget install failed for $appName after 3 attempts using ID: $wingetID"
+    Write-Host "Winget install failed for $appName after 3 attempts using ID: $wingetID" -ForegroundColor Red    # After all retries fail
     return 0
   }
 
@@ -1993,9 +1988,8 @@ if (Test-InternetConnection) { # Check for an internet connection
                 Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
 
               } catch {
-                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web...`nFailed to download or install $appToPotentiallyInstall... $_.Exception.Message"
                 $global:no_issues = 0
-                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
               }
             }
           }
@@ -2025,9 +2019,8 @@ if (Test-InternetConnection) { # Check for an internet connection
                 Retry-RemoveItem -Path $destinationFolderPath -MaxRetries 20 -DelaySeconds 2
 
               } catch {
-                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web...`nFailed to download or install $appToPotentiallyInstall... $_.Exception.Message"
                 $global:no_issues = 0
-                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
               }
             }
           }
@@ -2058,9 +2051,8 @@ if (Test-InternetConnection) { # Check for an internet connection
                 Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..."
 
               } catch {
-                Write-Host "Still could not install $appToPotentiallyInstall even through the web..."
+                Write-Host "Still could not install $appToPotentiallyInstall even through the web...`nFailed to download or install $appToPotentiallyInstall... $_.Exception.Message"
                 $global:no_issues = 0
-                Log-Error "Failed to download or install $appToPotentiallyInstall... $_.Exception.Message"
               }
             }
           } else { Write-Host "Forcefully removing Discord from System Startup. To re-enable, toggle OFF and then ON in Discord settings..." }
@@ -2077,6 +2069,10 @@ if (Test-InternetConnection) { # Check for an internet connection
 
         if ($appToPotentiallyInstall -eq "HWiNFO") { # Custom measures just for this app!!!!!
           Get-Process -Name "*HWiNFO*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
+        }
+
+        if ($appToPotentiallyInstall -eq "TailScale") { # Custom measures just for this app!!!!!
+          Get-Process -Name "*TailScale*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
         }
         
       } else { Write-Host "`n$appToPotentiallyInstall already exists, skipping installation..." }
