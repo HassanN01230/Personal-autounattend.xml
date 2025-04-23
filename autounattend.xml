@@ -1353,6 +1353,8 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 # $null = Invoke-Expression "net user Administrator Admin132 /active:yes"          # Was just for testing purpose, not needed
 # Write-Host "`nAttempted to enable the built-in Administrator account" -ForegroundColor Green  # Not really needed
 
+$null = schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" # Force the windows update task to run 
+
 Write-Host "`nFinished making changes to the system!"
 
 Write-Host "`nCurrent Hostname: $env:computername"
