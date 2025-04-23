@@ -1360,8 +1360,8 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 $taskName = "Scheduled Start"
 $taskPath = "\Microsoft\Windows\WindowsUpdate"
 $fullPath = "$taskPath\$taskName"
-schtasks /Query /TN "$fullPath" /XML > "$env:TEMP\WU-Task.xml"  # Export the task to XML
-[xml]$xml = Get-Content "$env:TEMP\WU-Task.xml" # Load and modify XML
+schtasks /Query /TN "$fullPath" /XML > "$env:TEMP\WU-Task.xml" *> null  # Export the task to XML
+[xml]$xml = Get-Content "$env:TEMP\WU-Task.xml"  # Load and modify XML
 $xml.Task.Settings.AllowStartOnDemand = "true" # Set AllowStartOnDemand to true (it's in Settings)
 $xml.Save("$env:TEMP\WU-Task-mod.xml") # Save the modified XML
 $null = schtasks /Delete /TN "$fullPath" /F # Delete the original task
@@ -2011,6 +2011,9 @@ if (Test-InternetConnection) { # Check for an internet connection
 
         if ($process.ExitCode -eq 0) {
           Write-Host "$appName has been installed successfully!"
+          return 1
+        } elseif ($process.ExitCode -eq -1978334967) {
+          Write-Host "$appName has been installed successfully! A system restart is required though ;)"
           return 1
         } else { Write-Host "Attempt $($tries + 1): Winget install (with ID) failed with exit code $($process.ExitCode)..." }
       } catch { Write-Host "Attempt $($tries + 1): Exception occurred while installing $appName (with ID) $($_.Exception.Message)..." }
