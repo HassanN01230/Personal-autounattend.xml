@@ -1348,6 +1348,11 @@ $qa = (New-Object -Com Shell.Application).Namespace($quickAccessPath);
 foreach ($item in $qa.Items()) { # Enumerate and unpin items
     if ($item.Name -ne "Desktop" -and $item.Name -ne "Downloads") { $item.InvokeVerb("unpinfromhome"); }}
 
+powercfg /hibernate on  # Enable Hibernation
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings"   # regpath for hibernate option to appear in start menu power options
+if (-not (Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }  # Create the path if its not already
+New-ItemProperty -Path $regPath -Name "ShowHibernateOption" -PropertyType DWord -Value 1 -Force | Out-Null    # update hibernate regkey so it appears
+
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0 -Force | Out-Null
 # $null = Invoke-Expression "net user Administrator Admin132 /active:yes"          # Was just for testing purpose, not needed
 # Write-Host "`nAttempted to enable the built-in Administrator account" -ForegroundColor Green  # Not really needed
@@ -1410,7 +1415,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $Host.UI.RawUI.WindowTitle = "AppsInstall"
 $desktopPath = [System.Environment]::GetFolderPath("Desktop") # Get the desktop path
 $logFilePath = "C:\Windows\Setup\Scripts\AppsInstall_Log.log"  # Specify the path to your log file with hostname and timestamp
-Start-Transcript -Path $logFilePath -Append
+$null = Start-Transcript -Path $logFilePath -Append
 Write-Host "File executed on/at: $(Get-Date -Format 'yyyy-MM-dd hh-mm-ss tt')"
 
 function Test-InternetConnection {
@@ -1614,7 +1619,7 @@ if (Test-InternetConnection) { # Check for an internet connection
 
   try {  # Try to check if 'winget' is available 
     winget --version
-    Write-Host "`nWinget is installed. Version: $(winget --version)`nUpdating Sources..."
+    Write-Host "Winget is installed. Updating Sources..."
   } catch {
     Write-Host "`nWinget not found! Installing it now..."
     try {
