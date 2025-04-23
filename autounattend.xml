@@ -1357,7 +1357,16 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 # $null = Invoke-Expression "net user Administrator Admin132 /active:yes"          # Was just for testing purpose, not needed
 # Write-Host "`nAttempted to enable the built-in Administrator account" -ForegroundColor Green  # Not really needed
 
-$null = schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" # Force the windows update task to run 
+$taskName = "Scheduled Start"
+$taskPath = "\Microsoft\Windows\WindowsUpdate"
+$fullPath = "$taskPath\$taskName"
+schtasks /Query /TN "$fullPath" /XML > "$env:TEMP\WU-Task.xml"  # Export the task to XML
+[xml]$xml = Get-Content "$env:TEMP\WU-Task.xml" # Load and modify XML
+$xml.Task.Settings.AllowStartOnDemand = "true" # Set AllowStartOnDemand to true (it's in Settings)
+$xml.Save("$env:TEMP\WU-Task-mod.xml") # Save the modified XML
+$null = schtasks /Delete /TN "$fullPath" /F # Delete the original task
+$null = schtasks /Create /TN "$fullPath" /XML "$env:TEMP\WU-Task-mod.xml" /RU "SYSTEM" # Re-create the task from the modified XML
+schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" *> null # Force the windows update task to run 
 
 Write-Host "`nFinished making changes to the system!"
 
@@ -1737,15 +1746,24 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="googleplaygamesBox" Content="Google Play Games" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="signalrgbBox" Content="SignalRgb" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+                <CheckBox Name="playniteBox" Content="Playnite" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="pythonBox" Content="Python 3.13" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+                <CheckBox Name="signalrgbBox" Content="SignalRgb" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
           </StackPanel>
           <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,10">
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="pythonBox" Content="Python 3.13" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="afterburnerBox" Content="MSI Afterburner" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="rufusBox" Content="Rufus" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="imgburnBox" Content="ImgBurn" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="crystalDiskInfoBox" Content="CrystalDiskInfo" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
@@ -1772,6 +1790,9 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="nomachineBox" Content="NoMachine" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="rustdeskBox" Content="RustDesk" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="localsendBox" Content="LocalSend" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
@@ -1779,6 +1800,12 @@ if (Test-InternetConnection) { # Check for an internet connection
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="jellyfinPlayerBox" Content="Jellyfin Media Player" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="gitBox" Content="Git" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="spotifyBox" Content="Spotify" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
           </StackPanel>
         <Button Name='SelectButton' Content='Proceed' Grid.Row='1' Grid.ColumnSpan="2" Width='90' Height="45" VerticalAlignment="Bottom" HorizontalAlignment='Center' FontSize='18'/>  
@@ -1856,6 +1883,10 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($googleplaygamesBox = $Window.FindName("googleplaygamesBox"));
         wingetID = "Google.PlayGames.Beta";
     }
+    "Playnite" = @{
+        checkBox = ($playniteBox = $Window.FindName("playniteBox"));
+        wingetID = "Playnite.Playnite";
+    }
     "SignalRgb" = @{
         checkBox = ($signalrgbBox = $Window.FindName("signalrgbBox"));
         wingetID = "WhirlwindFX.SignalRgb";
@@ -1867,6 +1898,14 @@ if (Test-InternetConnection) { # Check for an internet connection
     "MSI Afterburner" = @{
         checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
         wingetID = "Guru3D.Afterburner";
+    }
+    "Rufus" = @{
+        checkBox = ($rufusBox = $Window.FindName("rufusBox"));
+        wingetID = "Rufus.Rufus";
+    }
+    "ImgBurn" = @{
+        checkBox = ($imgburnBox = $Window.FindName("imgburnBox"));
+        wingetID = "LIGHTNINGUK.ImgBurn";
     }
     "CrystalDiskInfo" = @{
         checkBox = ($crystaldiskinfoBox = $Window.FindName("crystalDiskInfoBox"));
@@ -1900,6 +1939,10 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($nomachineBox = $Window.FindName("nomachineBox"));
         wingetID = "NoMachine.NoMachine";
     }
+    "RustDesk" = @{
+        checkBox = ($rustdeskBox = $Window.FindName("rustdeskBox"));
+        wingetID = "RustDesk.RustDesk";
+    }
     "LocalSend" = @{
         checkBox = ($localsendBox = $Window.FindName("localsendBox"));
         wingetID = "LocalSend.LocalSend";
@@ -1911,6 +1954,14 @@ if (Test-InternetConnection) { # Check for an internet connection
     "Jellyfin Media Player" = @{
         checkBox = ($jellyfinPlayerBox = $Window.FindName("jellyfinPlayerBox"));
         wingetID = "Jellyfin.JellyfinMediaPlayer";
+    }
+    "Git" = @{
+        checkBox = ($gitBox = $Window.FindName("gitBox"));
+        wingetID = "Git.Git";
+    }
+    "Spotify" = @{
+        checkBox = ($spotifyBox = $Window.FindName("spotifyBox"));
+        wingetID = "Spotify.Spotify";
     }
   }
 
