@@ -3,18 +3,27 @@
   <settings pass="offlineServicing"></settings>
   <settings pass="windowsPE">
     <component name="Microsoft-Windows-International-Core" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <SetupUILanguage>
+				<UILanguage>en-US</UILanguage>
+			</SetupUILanguage>
       <InputLocale>0409:00000409</InputLocale>  <!-- English (US) keyboard layout -->
       <SystemLocale>en-US</SystemLocale>         <!-- System locale: English (US) -->
       <UILanguage>en-US</UILanguage>            <!-- UI Language: English (US) -->
       <UserLocale>en-US</UserLocale>            <!-- User locale: English (US) -->
     </component>
     <component name="Microsoft-Windows-International-Core" processorArchitecture="arm64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <SetupUILanguage>
+				<UILanguage>en-US</UILanguage>
+			</SetupUILanguage>
       <InputLocale>0409:00000409</InputLocale>  <!-- English (US) keyboard layout -->
       <SystemLocale>en-US</SystemLocale>         <!-- System locale: English (US) -->
       <UILanguage>en-US</UILanguage>            <!-- UI Language: English (US) -->
       <UserLocale>en-US</UserLocale>            <!-- User locale: English (US) -->
     </component>
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <SetupUILanguage>
+				<UILanguage>en-US</UILanguage>
+			</SetupUILanguage>
       <InputLocale>0409:00000409</InputLocale>  <!-- English (US) keyboard layout -->
       <SystemLocale>en-US</SystemLocale>         <!-- System locale: English (US) -->
       <UILanguage>en-US</UILanguage>            <!-- UI Language: English (US) -->
