@@ -1769,9 +1769,6 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="afterburnerBox" Content="MSI Afterburner" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="rufusBox" Content="Rufus" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
-            </Viewbox>
-            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="imgburnBox" Content="ImgBurn" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
@@ -1908,10 +1905,6 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($afterburnerBox = $Window.FindName("afterburnerBox"));
         wingetID = "Guru3D.Afterburner";
     }
-    "Rufus" = @{
-        checkBox = ($rufusBox = $Window.FindName("rufusBox"));
-        wingetID = "Rufus.Rufus";
-    }
     "ImgBurn" = @{
         checkBox = ($imgburnBox = $Window.FindName("imgburnBox"));
         wingetID = "LIGHTNINGUK.ImgBurn";
@@ -2026,7 +2019,7 @@ if (Test-InternetConnection) { # Check for an internet connection
           Write-Host "$appName has been installed successfully! A system restart is required though ;)"
           return 1
         } elseif ($process.ExitCode -eq -1978335215) {
-          Write-Host "$appName cannot be installed! The Hash in winget repo hasn't been verified, skipping..."
+          Write-Host "$appName can't be installed! The hash in winget DB is not verified yet, skipping..."
           return 0
         } else { Write-Host "Attempt $($tries + 1): Winget install (with ID) failed with exit code $($process.ExitCode)..." }
       } catch { Write-Host "Attempt $($tries + 1): Exception occurred while installing $appName (with ID) $($_.Exception.Message)..." }
