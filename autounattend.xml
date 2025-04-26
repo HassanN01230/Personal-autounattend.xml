@@ -1019,6 +1019,9 @@ Get-WindowsOptionalFeature -Online | Where-Object -Property 'FeatureName' -In -V
     <!--Local Machine Registry Entries - This Sets Features for the Local Machine-->
     <File path="C:\Windows\Setup\Scripts\localmachine.cmd">
       <![CDATA[
+:: Added for redundancy      
+reg.exe add "HKLM\SYSTEM\Setup\MoSetup" /v AllowUpgradesWithUnsupportedTPMOrCPU /t REG_DWORD /d 1 /f;  
+
 :: Bypasses Microsoft Account Creation
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f
 
@@ -1101,6 +1104,9 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v 
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v HideSCAMeetNow /t REG_DWORD /d 1 /f
 
 :: Fix Managed by your organization in Edge
+reg.exe add "HKLM\Software\Policies\Microsoft\Edge" /v HideFirstRunExperience /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\Software\Policies\Microsoft\Edge\Recommended" /v BackgroundModeEnabled /t REG_DWORD /d 0 /f;
+reg.exe add "HKLM\Software\Policies\Microsoft\Edge\Recommended" /v StartupBoostEnabled /t REG_DWORD /d 0 /f;
 reg.exe delete "HKLM\SOFTWARE\Policies\Microsoft\Edge" /f
 
 :: Set Registry Keys to Disable Wifi-Sense
@@ -1329,12 +1335,15 @@ reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 
 :: Disables Notification Tray and Calendar
 reg.exe add "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Explorer" /v DisableNotificationCenter /t REG_DWORD /d 1 /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications" /v DisableNotifications /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" /v HideSystray /t REG_DWORD /d 1 /f;
 reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\PushNotifications" /v ToastEnabled /t REG_DWORD /d 0 /f
 
 :: Set Classic Right-Click Menu for Windows 11
 reg.exe add "HKEY_CURRENT_USER\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /ve /t REG_SZ /d "" /f
 
 :: Disable Xbox GameDVR
+reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f
 reg.exe add "HKEY_CURRENT_USER\System\GameConfigStore" /v GameDVR_FSEBehavior /t REG_DWORD /d 2 /f
 reg.exe add "HKEY_CURRENT_USER\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f
 reg.exe add "HKEY_CURRENT_USER\System\GameConfigStore" /v GameDVR_DXGIHonorFSEWindowsCompatible /t REG_DWORD /d 1 /f
@@ -1467,6 +1476,26 @@ foreach ($volume in $BLV) {
   } 
 }
 
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ControlAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "AnimateMinMax" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMAeroPeekEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "MenuAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TooltipAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "SelectionFade" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMSaveThumbnailEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;           # "performance" settings for visuals under advanced system settings
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "CursorShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ThumbnailsOrIcon" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewAlphaSelect" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DragFullWindows" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ComboBoxAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "FontSmoothing" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListBoxSmoothScrolling" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DropShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+
+Set-WinHomeLocation -GeoId 39  # set region to USA
+
 New-ItemProperty -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name 'EnableAutoTray' -Value 0 -PropertyType DWord -Force | Out-Null  # In Win10, makes all task tray icons appear on taskbar and essentially disables the tray
 
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "SleepStudySessionThresholdSeconds" -Value 0x0000001e -PropertyType DWord -Force | Out-Null   # setting SleepStudySessionThresholdSeconds to 30 seconds
@@ -1531,7 +1560,8 @@ foreach ($key in $onedriveKeys.PSObject.Properties) { if ($key.Name -like "*OneD
 $onedriveKeys = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -ErrorAction SilentlyContinue
 foreach ($key in $onedriveKeys.PSObject.Properties) { if ($key.Name -like "*OneDrive*") { Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $key.Name -Force }}
 
-Get-AppxPackage -AllUsers "*Microsoft.Copilot*" | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+Get-AppxPackage -AllUsers "*Microsoft.Copilot*" -ErrorAction SilentlyContinue | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+Get-AppxPackage -AllUsers "*Copilot*" -ErrorAction SilentlyContinue | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
 Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband\AuxilliaryPins" -Name "CopilotPWAPin" -Force -ErrorAction SilentlyContinue
 if (-not (Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced")) { New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name "Advanced" -Force | Out-Null }
 if (-not (Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced")) { New-Item -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name "Advanced" -Force | Out-Null }
@@ -1559,6 +1589,7 @@ $qa = (New-Object -Com Shell.Application).Namespace($quickAccessPath);
 foreach ($item in $qa.Items()) { # Enumerate and unpin items
     if ($item.Name -ne "Desktop" -and $item.Name -ne "Downloads") { $item.InvokeVerb("unpinfromhome"); }}
 
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f;  # disable fast startup unless you want your system to be cooked long term
 powercfg /hibernate on  # Enable Hibernation
 $regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings"   # regpath for hibernate option to appear in start menu power options
 if (-not (Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }  # Create the path if its not already
