@@ -1811,6 +1811,9 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="gitBox" Content="Git" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
+                <CheckBox Name="githubBox" Content="GitHub Desktop" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+            </Viewbox>
+            <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="spotifyBox" Content="Spotify" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
           </StackPanel>
@@ -1960,6 +1963,10 @@ if (Test-InternetConnection) { # Check for an internet connection
     "Git" = @{
         checkBox = ($gitBox = $Window.FindName("gitBox"));
         wingetID = "Git.Git";
+    }
+    "GitHub" = @{
+        checkBox = ($githubBox = $Window.FindName("githubBox"));
+        wingetID = "GitHub.GitHubDesktop";
     }
     "Spotify" = @{
         checkBox = ($spotifyBox = $Window.FindName("spotifyBox"));
