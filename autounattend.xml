@@ -416,7 +416,9 @@ foreach( $file in $Document.unattend.Extensions.File ) {
   'Microsoft.Windows.DevHome';
   'MicrosoftCorporationII.MicrosoftFamily';
   'Microsoft.WindowsFeedbackHub';
+  'Microsoft.Cortana',
   'Microsoft.GetHelp';
+  'Microsoft.Getstarted';
   'microsoft.windowscommunicationsapps';
   'Microsoft.WindowsMaps';
   'Microsoft.BingNews';
@@ -425,11 +427,15 @@ foreach( $file in $Document.unattend.Extensions.File ) {
   'Microsoft.OutlookForWindows';
   'Microsoft.People';
   'Microsoft.PowerAutomateDesktop';
+  'MicrosoftCorporationII.QuickAssist';
   'Microsoft.SkypeApp';
   'Microsoft.MicrosoftSolitaireCollection';
+  'Microsoft.MicrosoftStickyNotes';
+  'Microsoft.MicrosoftEdge.Stable';
+  'MicrosoftTeams';
   'MSTeams';
-  'Microsoft.Getstarted';
   'Microsoft.Todos';
+  'Microsoft.Wallet';
   'Microsoft.BingWeather';
   'Microsoft.Xbox.TCUI';
   'Microsoft.XboxApp';
@@ -443,19 +449,26 @@ foreach( $file in $Document.unattend.Extensions.File ) {
   'Microsoft.MixedReality.Portal';
   'Microsoft.Windows.Ai.Copilot.Provider';
   'Microsoft.WindowsMeetNow';
-) | Remove-AppxProvisionedPackage -AllUsers -Online
+) | Remove-AppxProvisionedPackage -AllUsers -Online -ErrorAction Continue
 
 # Uninstall Copilot Package (if installed as an app)
 Get-AppxPackage -Name "*Windows.Copilot*" -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarCopilotButtonEnabled" -PropertyType DWord -Value 0 -Force | Out-Null  
 
-Get-WindowsCapability -Online | Where-Object -FilterScript {
+Get-WindowsCapability -Online | Where-Object {
   ($_.Name -split '~')[0] -in @(
     'Browser.InternetExplorer';
+    'Microsoft.Windows.PowerShell.ISE';
+    'Microsoft.Windows.Cortana';
+    'Microsoft.Windows.DevHome';
+    'Microsoft.Windows.XPSViewer';
+    'App.Support.QuickAssist';
+    'OneCoreUAP.OneSync';
     'OpenSSH.Client';
+    'OpenSSH.Server';
     'App.StepsRecorder';
-    'Microsoft.Windows.WordPad';
-  );
+    'Microsoft.Windows.WordPad'
+  )
 } | Remove-WindowsCapability -Online]]>
     </File>
 
