@@ -4,7 +4,7 @@
   <settings pass="windowsPE">
     <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="x86" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<SetupUILanguage>
-				<UILanguage>en-US</UILanguage>
+			  <UILanguage>en-US</UILanguage>
 			</SetupUILanguage>
 			<InputLocale>0409:00000409</InputLocale>
 			<SystemLocale>en-US</SystemLocale>
@@ -503,7 +503,6 @@ Get-WindowsCapability -Online | Where-Object {
     'Microsoft.Windows.XPSViewer';
     'TelnetClient';
     'App.Support.QuickAssist';
-    'OneCoreUAP.OneSync';
     'OpenSSH.Client';
     'OpenSSH.Server';
     'App.StepsRecorder';
@@ -511,13 +510,11 @@ Get-WindowsCapability -Online | Where-Object {
   )
 } | Remove-WindowsCapability -Online -ErrorAction Continue
 
-Get-WindowsOptionalFeature -Online | Where-Object -Property 'FeatureName' -In -Value @(
-  'Internet-Explorer-Optional-amd64';
-  'Microsoft-Edge-Optional';
-  'Windows-ISE';
-  'XPS-Viewer';
-  'TelnetClient';
-) | Disable-WindowsOptionalFeature -Online -Remove -ErrorAction Continue]]>
+dism /online /disable-feature /featurename:Internet-Explorer-Optional-amd64 /remove /norestart
+dism /online /disable-feature /featurename:Microsoft-Edge-Optional /remove /norestart
+dism /online /disable-feature /featurename:Windows-ISE /remove /norestart
+dism /online /disable-feature /featurename:XPS-Viewer /remove /norestart
+dism /online /disable-feature /featurename:TelnetClient /remove /norestart]]>
     </File>
 
     <!--Powershell Script to Run Various Tweaks-->
@@ -1337,27 +1334,28 @@ foreach ($volume in $BLV) {
   } 
 }
 
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ControlAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "AnimateMinMax" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMAeroPeekEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "MenuAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TooltipAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "SelectionFade" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMSaveThumbnailEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;           # "performance" settings for visuals under advanced system settings
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "CursorShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ThumbnailsOrIcon" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewAlphaSelect" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DragFullWindows" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ComboBoxAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "FontSmoothing" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListBoxSmoothScrolling" -Value 0 -PropertyType DWord -Force | Out-Null;
-New-ItemProperty -Path "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DropShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Force | Out-Nul
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ControlAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "AnimateMinMax" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMAeroPeekEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "MenuAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TooltipAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "SelectionFade" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DWMSaveThumbnailEnabled" -Value 0 -PropertyType DWord -Force | Out-Null;           # "performance" settings for visuals under advanced system settings
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "CursorShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ThumbnailsOrIcon" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListviewAlphaSelect" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DragFullWindows" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ComboBoxAnimation" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "FontSmoothing" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListBoxSmoothScrolling" -Value 0 -PropertyType DWord -Force | Out-Null;
+New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DropShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
 
 Set-WinHomeLocation -GeoId 39  # set region to USA
 
-New-ItemProperty -Path "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name 'EnableAutoTray' -Value 0 -PropertyType DWord -Force | Out-Null  # In Win10, makes all task tray icons appear on taskbar and essentially disables the tray
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name 'EnableAutoTray' -Value 0 -PropertyType DWord -Force | Out-Null  # In Win10, makes all task tray icons appear on taskbar and essentially disables the tray
 
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "SleepStudySessionThresholdSeconds" -Value 0x0000001e -PropertyType DWord -Force | Out-Null   # setting SleepStudySessionThresholdSeconds to 30 seconds
 
