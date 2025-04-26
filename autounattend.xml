@@ -1369,13 +1369,19 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 $taskName = "Scheduled Start"
 $taskPath = "\Microsoft\Windows\WindowsUpdate"
 $fullPath = "$taskPath\$taskName"
-schtasks /Query /TN "$fullPath" /XML > "$env:TEMP\WU-Task.xml" *> null  # Export the task to XML
+schtasks /Query /TN "$fullPath" /XML > "$env:TEMP\WU-Task.xml" *> $null  # Export the task to XML
 [xml]$xml = Get-Content "$env:TEMP\WU-Task.xml"  # Load and modify XML
 $xml.Task.Settings.AllowStartOnDemand = "true" # Set AllowStartOnDemand to true (it's in Settings)
 $xml.Save("$env:TEMP\WU-Task-mod.xml") # Save the modified XML
 $null = schtasks /Delete /TN "$fullPath" /F # Delete the original task
 $null = schtasks /Create /TN "$fullPath" /XML "$env:TEMP\WU-Task-mod.xml" /RU "SYSTEM" # Re-create the task from the modified XML
-schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" *> null # Force the windows update task to run 
+schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" *> $null # Force the windows update task to run 
+
+vssadmin delete shadows /for=C: /all /quiet *> $null    # Deletes all previous system restore points
+Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue   # Enables system restore
+vssadmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5% *> $null   # Internally, VSS (Volume Shadow Copy Service) manages shadow copies (aka snapshots) and these volume shadow copies save the system state into "restore points"
+New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\SystemRestore" -Name "SystemRestorePointCreationFrequency" -Value 0 -Force | Out-Null
+Checkpoint-Computer -Description "Right before hostname input" -ErrorAction SilentlyContinue
 
 Write-Host "`nFinished making changes to the system!"
 
