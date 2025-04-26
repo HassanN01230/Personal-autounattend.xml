@@ -1353,7 +1353,7 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ListBoxSmoothScrolling" -Value 0 -PropertyType DWord -Force | Out-Null;
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "DropShadow" -Value 0 -PropertyType DWord -Force | Out-Null;
 
-Set-WinHomeLocation -GeoId 39  # set region to USA
+Set-WinHomeLocation -GeoId 39 -ErrorAction SilentlyContinue  # set region to USA
 
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name 'EnableAutoTray' -Value 0 -PropertyType DWord -Force | Out-Null  # In Win10, makes all task tray icons appear on taskbar and essentially disables the tray
 
@@ -1448,7 +1448,7 @@ $qa = (New-Object -Com Shell.Application).Namespace($quickAccessPath);
 foreach ($item in $qa.Items()) { # Enumerate and unpin items
     if ($item.Name -ne "Desktop" -and $item.Name -ne "Downloads") { $item.InvokeVerb("unpinfromhome"); }}
 
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f;  # disable fast startup unless you want your system to be cooked long term
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name HiberbootEnabled -PropertyType DWord -Value 0 -Force | Out-Null  # disable fast startup unless you want your system to be cooked long term
 powercfg /hibernate on  # Enable Hibernation
 $regPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings"   # regpath for hibernate option to appear in start menu power options
 if (-not (Test-Path $regPath)) { New-Item -Path $regPath -Force | Out-Null }  # Create the path if its not already
@@ -2306,7 +2306,7 @@ if (Test-InternetConnection) { # Check for an internet connection
   $folders = @("C:\Windows\LiveKernelReports", "C:\Windows\Minidump" )
   foreach ($folder in $folders) { if (Test-Path $folder) { Get-ChildItem -Path $folder -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue }}
 
-  Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'Restricted' -Force
+  # Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'Restricted' -Force
   $null = reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 1 /f # Enables User Account Control which prompts user 
 
   if ($global:no_issues -eq 1) {
