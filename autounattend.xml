@@ -1334,7 +1334,7 @@ foreach ($volume in $BLV) {
   } 
 }
 
-New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Force | Out-Nul
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Force | Out-Null   # forcefully creating the path
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "ControlAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "AnimateMinMax" -Value 0 -PropertyType DWord -Force | Out-Null;
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "TaskbarAnimations" -Value 0 -PropertyType DWord -Force | Out-Null;
@@ -1469,6 +1469,25 @@ $null = schtasks /Delete /TN "$fullPath" /F # Delete the original task
 $null = schtasks /Create /TN "$fullPath" /XML "$env:TEMP\WU-Task-mod.xml" /RU "SYSTEM" # Re-create the task from the modified XML
 schtasks /Run /TN "\Microsoft\Windows\WindowsUpdate\Scheduled Start" *> $null # Force the windows update task to run 
 
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" -Force | Out-Null  # Create registry path if it doesn't exist
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"  # Variable Creation for lock screen wallpaper
+$LockScreenImage = 'C:\Windows\Web\Wallpaper\ThemeA\img20.jpg'  # Adjust with your actual lock screen image
+New-ItemProperty -Path $RegPath -Name LockScreenImagePath -Value $LockScreenImage -PropertyType String -Force | Out-Null
+New-ItemProperty -Path $RegPath -Name LockScreenImageUrl -Value $LockScreenImage -PropertyType String -Force | Out-Null     # Set Lock Screen Wallpaper Registry Keys
+New-ItemProperty -Path $RegPath -Name LockScreenImageStatus -Value 1 -PropertyType DWORD -Force | Out-Null
+
+#################### Now it's time to create scripts the user can manually execute to revert specific changes ####################
+if (-not (Test-Path -Path "$desktopPath\Scripts")) { New-Item -Path "$desktopPath\Scripts" -ItemType Directory -Force | Out-Null }
+
+### PowerShell script content to delete registry keys for lockscreen wallpaper and allow manual changes ###
+$scriptContent = @"
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP' -Name 'LockScreenImagePath' -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP' -Name 'LockScreenImageUrl' -ErrorAction SilentlyContinue  # Delete lock screen wallpaper registry keys to allow manual changes
+Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP' -Name 'LockScreenImageStatus' -ErrorAction SilentlyContinue
+Write-Host 'Lock screen wallpaper settings have been removed. You can now change it manually.'
+"@
+Set-Content -Path "$desktopPath\Scripts\Remove-LockScreenWallpaper.ps1" -Value $scriptContent -Force -ErrorAction SilentlyContinue  # Create the PowerShell script file on the desktop\scripts folder
+
 vssadmin delete shadows /for=C: /all /quiet *> $null    # Deletes all previous system restore points
 Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue   # Enables system restore
 vssadmin Resize ShadowStorage /For=C: /On=C: /MaxSize=5% *> $null   # Internally, VSS (Volume Shadow Copy Service) manages shadow copies (aka snapshots) and these volume shadow copies save the system state into "restore points"
@@ -1532,7 +1551,6 @@ $Host.UI.RawUI.WindowTitle = "AppsInstall"
 $desktopPath = [System.Environment]::GetFolderPath("Desktop") # Get the desktop path
 $logFilePath = "C:\Windows\Setup\Scripts\AppsInstall_Log.log"  # Specify the path to your log file with hostname and timestamp
 $null = Start-Transcript -Path $logFilePath -Append
-Write-Host "File executed on/at: $(Get-Date -Format 'yyyy-MM-dd hh-mm-ss tt')"
 
 function Test-InternetConnection {
   $retries = 5
