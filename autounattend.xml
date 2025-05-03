@@ -1448,6 +1448,7 @@ New-Item -Path $regPath -Force -ErrorAction SilentlyContinue | Out-Null  # Force
 New-ItemProperty -Path $regPath -Name "RotatingLockScreenEnabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
 New-ItemProperty -Path $regPath -Name "RotatingLockScreenOverlayEnabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null    # Enable Spotlight via registry
 New-ItemProperty -Path $regPath -Name "ContentDeliveryAllowed" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
+New-ItemProperty -Path $regPath -Name "SubscribedContentEnabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
 New-ItemProperty -Path $regPath -Name "SubscribedContent-338389Enabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
 New-ItemProperty -Path $regPath -Name "SubscribedContent-353698Enabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
 Remove-Item "$env:LOCALAPPDATA\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets\*" -Recurse -Force -ErrorAction SilentlyContinue       # Clear Spotlight asset and settings cache
