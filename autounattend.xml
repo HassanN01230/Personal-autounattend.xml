@@ -2287,7 +2287,7 @@ if (Test-InternetConnection) { # Check for an internet connection
   $folders = @("C:\Windows\LiveKernelReports", "C:\Windows\Minidump" )
   foreach ($folder in $folders) { if (Test-Path $folder) { Get-ChildItem -Path $folder -Recurse | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue }}
 
-  # Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'Restricted' -Force
+  Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'Restricted' -Force
   $null = reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 1 /f # Enables User Account Control which prompts user 
 
   if ($global:no_issues -eq 1) {
