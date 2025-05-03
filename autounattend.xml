@@ -1058,8 +1058,6 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin" /v BlockAAD
 
     <File path="C:\Windows\Setup\Scripts\currentuser.cmd">
       <![CDATA[
-timeout 20 >NUL
-
 "C:\Windows\Resources\Themes\dark.theme"   
 
 :: Disabling the Delivery of Personalized or Suggested Content Like App Suggestions, Tips, and Advertisements in Windows
