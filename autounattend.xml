@@ -1458,6 +1458,23 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 # $null = Invoke-Expression "net user Administrator Admin132 /active:yes"          # Was just for testing purpose, not needed
 # Write-Host "`nAttempted to enable the built-in Administrator account" -ForegroundColor Green  # Not really needed
 
+Get-AppxPackage -Name Microsoft.Windows.ContentDeliveryManager -AllUsers -ErrorAction SilentlyContinue | ForEach-Object { Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml" -ErrorAction SilentlyContinue } # Re-register ContentDeliveryManager package
+$regPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"  # Registry path for Windows Spotlight (lockscreen wallpaper)
+New-Item -Path $regPath -Force -ErrorAction SilentlyContinue | Out-Null  # Forcefully create regpath
+New-ItemProperty -Path $regPath -Name "RotatingLockScreenEnabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
+New-ItemProperty -Path $regPath -Name "RotatingLockScreenOverlayEnabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null    # Enable Spotlight via registry
+New-ItemProperty -Path $regPath -Name "ContentDeliveryAllowed" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
+New-ItemProperty -Path $regPath -Name "SubscribedContent-338389Enabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
+New-ItemProperty -Path $regPath -Name "SubscribedContent-353698Enabled" -Value 1 -PropertyType DWORD -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:LOCALAPPDATA\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets\*" -Recurse -Force -ErrorAction SilentlyContinue       # Clear Spotlight asset and settings cache
+Remove-Item "$env:LOCALAPPDATA\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\Settings\*.*" -Force -ErrorAction SilentlyContinue
+
+if (Test-Path 'HKCU:\Control Panel\NotifyIconSettings') {   # Windows 11 only, makes all apps icons NOT be in tray and instead be on taskbar. This will be done again later
+  Get-ChildItem -Path 'HKCU:\Control Panel\NotifyIconSettings' | ForEach-Object {
+    New-ItemProperty -Path $_.PSPath -Name 'IsPromoted' -Value 1 -PropertyType DWord -Force | Out-Null
+  }
+} else { New-Item -Path "HKCU:\Control Panel\NotifyIconSettings" -Force -ErrorAction SilentlyContinue | Out-Null }
+
 $taskName = "Scheduled Start"
 $taskPath = "\Microsoft\Windows\WindowsUpdate"
 $fullPath = "$taskPath\$taskName"
