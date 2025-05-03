@@ -910,7 +910,7 @@ reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabl
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v AllowNewsAndInterests /t REG_DWORD /d 0 /f
 
 :: Disables Windows Consumer Features Like App Promotions etc.
-reg.exe add "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 0 /f
+reg.exe add "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 1 /f
 
 :: Disables Bitlocker Auto Encryption on Windows 11 24H2 and Onwards
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d 1 /f
@@ -1058,7 +1058,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin" /v BlockAAD
 
     <File path="C:\Windows\Setup\Scripts\currentuser.cmd">
       <![CDATA[
-timeout 30 >NUL
+timeout 20 >NUL
 
 "C:\Windows\Resources\Themes\dark.theme"   
 
