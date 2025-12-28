@@ -1306,6 +1306,13 @@ reg.exe add "HKEY_CURRENT_USER\Software\Microsoft\Multimedia\Audio" /v "UserDuck
 :: Hides Search Icon on Taskbar
 reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f
 
+:: Disabling more AI stuff for current user
+reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\BrandingKey" /v BrandedKeyChoiceType /t REG_SZ /d "Search.App" /f
+reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\BrandingKey" /v AppAumid /t REG_SZ /d "Microsoft.Copilot_8wekyb3d8bbwe!App" /f
+reg.exe add "HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\CopilotKey" /v SetCopilotHardwareKey /t REG_SZ /d "" /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsAccessGenerativeAI /t REG_DWORD /d 2 /f
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsAccessSystemAIModules /t REG_DWORD /d 2 /f
+
 reg.exe add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v "PostInstall" /t REG_SZ /d "powershell.exe -File C:\Windows\Setup\Scripts\PostInstall.ps1" /f
 shutdown /r -t 1
     ]]>
