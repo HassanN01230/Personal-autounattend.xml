@@ -2292,6 +2292,7 @@ if (Test-InternetConnection) { # Check for an internet connection
           Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode" -Name "Icon" -Type ExpandString -Value "%LocalAppData%\Programs\Microsoft VS Code\Code.exe"        # These make the "Open with Code" option show up for a folder in File Explorer
           New-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode\command" -Force | Out-Null
           Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode\command" -Name "(default)" -Type ExpandString -Value "`"%LocalAppData%\Programs\Microsoft VS Code\Code.exe`" `"%1`""
+          Copy-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode" -Destination "Registry::HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode" -Recurse -Force   # Make "open with code" also appear when right clicking on any folder background, not just the folder itself
         }
 
         if ($appToPotentiallyInstall -eq "PowerToys") { # Custom measures just for this app!!!!!
