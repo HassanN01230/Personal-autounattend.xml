@@ -2286,6 +2286,14 @@ if (Test-InternetConnection) { # Check for an internet connection
           if (Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -ErrorAction SilentlyContinue) { Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Discord" -Force }
         }
 
+        if ($appToPotentiallyInstall -eq "Visual Studio Code") { # Custom measures just for this app!!!!!
+          New-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode" -Force | Out-Null
+          Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode" -Name "(default)" -Value "Open with Code"
+          Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode" -Name "Icon" -Type ExpandString -Value "%LocalAppData%\Programs\Microsoft VS Code\Code.exe"        # These make the "Open with Code" option show up for a folder in File Explorer
+          New-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode\command" -Force | Out-Null
+          Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\VSCode\command" -Name "(default)" -Type ExpandString -Value "`"%LocalAppData%\Programs\Microsoft VS Code\Code.exe`" `"%1`""
+        }
+
         if ($appToPotentiallyInstall -eq "PowerToys") { # Custom measures just for this app!!!!!
           Get-Process -Name "*PowerToys*" -ErrorAction SilentlyContinue | Stop-Process -Force -Erroraction SilentlyContinue
         }
