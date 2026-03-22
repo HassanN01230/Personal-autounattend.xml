@@ -1737,59 +1737,63 @@ if (Test-InternetConnection) { # Check for an internet connection
   Add-Type -AssemblyName System.Windows.Forms
 
   $ProgressPreference = 'SilentlyContinue'  #used to hide progress bar in invoke-webrequest and start-bitstransfer
+  $wingetReady = $false
   try {
-    Write-Host "`nResetting and preparing the Microsoft Store..." -ForegroundColor Cyan
-    Get-AppxPackage -AllUsers -Name "Microsoft.WindowsStore" | Remove-AppxPackage -ErrorAction SilentlyContinue  #first remove the current microsoft store 
-    Get-AppxPackage -allusers Microsoft.WindowsStore | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 2
-    $tryMethod = 1
+    winget --version | Out-Null
+    Write-Host "`nWinget is already installed!" -ForegroundColor Green
+    $wingetReady = $true
+  } catch {}
 
-    if ($tryMethod -eq 1) {
-      try {
-        Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -ErrorAction Stop | Out-Null  #reset the microsoft store so it is reinstalled with dependencies
-        $timer = 0
-        while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
-          Start-Sleep -Seconds 1
-          $timer++
-          if ($timer -ge 60) { 
-            $tryMethod = 2
-            break
+  if (-not $wingetReady) {
+    Write-Host "`nWinget not detected. Resetting the Microsoft Store to install it..." -ForegroundColor Cyan
+    try {
+      Get-AppxPackage -AllUsers -Name "Microsoft.WindowsStore" | Remove-AppxPackage -ErrorAction SilentlyContinue  #first remove the current microsoft store 
+      Get-AppxPackage -allusers Microsoft.WindowsStore | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+      Start-Sleep -Seconds 2
+      $tryMethod = 1
+
+      if ($tryMethod -eq 1) {
+        try {
+          Start-Process -FilePath "wsreset" -ArgumentList "-i" -NoNewWindow -Wait -ErrorAction Stop | Out-Null  #reset the microsoft store so it is reinstalled with dependencies
+          $timer = 0
+          while (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) {
+            Start-Sleep -Seconds 1
+            $timer++
+            if ($timer -ge 60) { 
+              $tryMethod = 2
+              break
+            }
           }
-        }
-      } catch { $tryMethod = 2 }
-    }
+        } catch { $tryMethod = 2 }
+      }
 
-    if ($tryMethod -eq 2) {
-      try {
-        wsreset -i
+      if ($tryMethod -eq 2) {
+        try {
+          wsreset -i
+          Start-Sleep -Seconds 15
+          if (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) { $tryMethod = 3 }
+        } catch { $tryMethod = 3 }
+      }
+
+      if ($tryMethod -eq 3) {
+        $storePackage = "Microsoft.WindowsStore_8wekyb3d8bbwe"
+        $installCommand = "Get-AppxPackage -AllUsers *$storePackage* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register `$($_.InstallLocation)\AppXManifest.xml}"
+        Invoke-Expression $installCommand
         Start-Sleep -Seconds 15
-        if (-not (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue)) { $tryMethod = 3 }
-      } catch { $tryMethod = 3 }
+      }
+      
+      if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { 
+        Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green 
+      } else {  
+        Write-Host "Could not reset the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
+        pause
+      }
+    } catch { 
+      Write-Host "Resetting Microsoft Store failed! Hit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
+      Pause
     }
 
-    if ($tryMethod -eq 3) {
-      $storePackage = "Microsoft.WindowsStore_8wekyb3d8bbwe"
-      $installCommand = "Get-AppxPackage -AllUsers *$storePackage* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register `$($_.InstallLocation)\AppXManifest.xml}"
-      Invoke-Expression $installCommand
-      Start-Sleep -Seconds 15
-    }
-    
-    if (Get-AppxPackage -Name Microsoft.WindowsStore -ErrorAction SilentlyContinue) { 
-      Write-Host "Successfully reset the Microsoft Store!" -ForegroundColor Green 
-    } else {  
-      Write-Host "Could not reset the Microsoft Store...`nHit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
-      pause
-    }
-  } catch { 
-    Write-Host "Resetting Microsoft Store failed! Hit Enter to proceed with the rest of the process (it may not work)" -ForegroundColor Red
-    Pause
-  }
-
-  try {  # Try to check if 'winget' is available 
-    winget --version
-    Write-Host "Winget is installed. Updating Sources..."
-  } catch {
-    Write-Host "`nWinget not found! Installing it now..."
+    Write-Host "`nInstalling Winget..." -ForegroundColor Cyan
     try {
       Start-BitsTransfer -Source "https://aka.ms/getwinget" -Destination "$env:userprofile\Downloads\winget.msixbundle" -ErrorAction Stop # Download the winget installer (AppInstaller.msixbundle)
       Add-AppxPackage "$env:userprofile\Downloads\winget.msixbundle" -ErrorAction Stop  # Install the AppInstaller package (which includes Winget)
