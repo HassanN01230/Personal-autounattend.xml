@@ -1731,11 +1731,6 @@ function Retry-RemoveItem {
 
 if (Test-InternetConnection) { # Check for an internet connection
   Write-Host "`nInternet connection detected! Starting apps installation..."
-  Add-Type -AssemblyName PresentationFramework
-  Add-Type -AssemblyName PresentationCore                # Load the required .NET assemblies
-  Add-Type -AssemblyName WindowsBase
-  Add-Type -AssemblyName System.Windows.Forms
-
   $ProgressPreference = 'SilentlyContinue'  #used to hide progress bar in invoke-webrequest and start-bitstransfer
   $wingetReady = $false
   try {
@@ -1814,6 +1809,10 @@ if (Test-InternetConnection) { # Check for an internet connection
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('WINGET_TERMS', 'Accepted', [System.EnvironmentVariableTarget]::Machine)
   $global:no_issues = 1
+  Add-Type -AssemblyName PresentationFramework
+  Add-Type -AssemblyName PresentationCore                # Load the required .NET assemblies
+  Add-Type -AssemblyName WindowsBase
+  Add-Type -AssemblyName System.Windows.Forms
 
   $xaml= @"  
 <Window xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'  
@@ -1867,7 +1866,7 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="FirefoxBox" Content="Mozilla Firefox" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="vivaldiBox" Content="Vivaldi" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+                <CheckBox Name="claudeBox" Content="Claude" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
                 <CheckBox Name="DiscordBox" Content="Discord" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
@@ -1968,7 +1967,7 @@ if (Test-InternetConnection) { # Check for an internet connection
                 <CheckBox Name="githubBox" Content="GitHub Desktop" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
             <Viewbox Stretch="Uniform" Height="23" HorizontalAlignment="Left">
-                <CheckBox Name="spotifyBox" Content="Spotify" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
+                <CheckBox Name="cursorBox" Content="Cursor" FontSize="13" Foreground="#444" VerticalAlignment="Center"/>
             </Viewbox>
           </StackPanel>
         <Button Name='SelectButton' Content='Proceed' Grid.Row='1' Grid.ColumnSpan="2" Width='90' Height="45" VerticalAlignment="Bottom" HorizontalAlignment='Center' FontSize='18'/>  
@@ -1990,9 +1989,9 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($FirefoxBox = $Window.FindName("FirefoxBox"));
         wingetID = "Mozilla.Firefox";
     }
-    "Vivaldi" = @{
-        checkBox = ($vivaldiBox = $Window.FindName("vivaldiBox"));
-        wingetID = "Vivaldi.Vivaldi";
+    "Claude" = @{
+        checkBox = ($claudeBox = $Window.FindName("claudeBox"));
+        wingetID = "Anthropic.Claude";
     }
     "Discord" = @{
         checkBox = ($DiscordBox = $Window.FindName("DiscordBox"));
@@ -2122,9 +2121,9 @@ if (Test-InternetConnection) { # Check for an internet connection
         checkBox = ($githubBox = $Window.FindName("githubBox"));
         wingetID = "GitHub.GitHubDesktop";
     }
-    "Spotify" = @{
-        checkBox = ($spotifyBox = $Window.FindName("spotifyBox"));
-        wingetID = "Spotify.Spotify";
+    "Cursor" = @{
+        checkBox = ($cursorBox = $Window.FindName("cursorBox"));
+        wingetID = "Anysphere.Cursor";
     }
   }
 
