@@ -1487,6 +1487,11 @@ if (-not (Test-Path $desktopPath)) { New-Item -Path $desktopPath -Force | Out-Nu
 New-ItemProperty -Path $desktopPath -Name "AutoEndTasks" -PropertyType String -Value "1" -Force | Out-Null  
 New-ItemProperty -Path $desktopPath -Name "HungAppTimeout" -PropertyType String -Value "2000" -Force | Out-Null    # Set HungAppTimeout for the .DEFAULT user using the Registry provider   
 
+New-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsAI" -Force
+New-ItemProperty -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -Value 1 -PropertyType DWord -Force | Out-Null       # Disable "Click to do" feature
+New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Force
+New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -Value 1 -PropertyType DWord -Force | Out-Null     
+
 if (-not (Test-Path "HKCU:\Control Panel\Desktop")) { New-Item -Path "HKCU:\Control Panel\Desktop" -Force | Out-Null }
 New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DelayLockInterval" -PropertyType DWord -Value 0 -Force | Out-Null  # always prompt for password after sleep, closing & reopening lid, etc.
 
